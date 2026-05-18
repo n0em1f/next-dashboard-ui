@@ -83,7 +83,7 @@ const FinanceChart = () => {
         <h1 className="text-lg font-semibold">Finance</h1>
         <Image src="/moreDark.png" alt="" width={20} height={20} />
       </div>
-      <ResponsiveContainer width="100%" height="90%">
+      <ResponsiveContainer width="100%" height={300}>
         <LineChart
           width={500}
           height={300}

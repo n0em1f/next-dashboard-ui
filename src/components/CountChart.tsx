@@ -1,34 +1,33 @@
-"use client";
-import Image from "next/image";
+'use client';
+import Image from 'next/image';
 import {
   RadialBarChart,
   RadialBar,
   Legend,
   ResponsiveContainer,
-} from "recharts";
-
+} from 'recharts';
 
 const CountChart = ({ boys, girls }: { boys: number; girls: number }) => {
   const data = [
     {
-      name: "Total",
-      count: boys+girls,
-      fill: "white",
+      name: 'Total',
+      count: boys + girls,
+      fill: 'white',
     },
     {
-      name: "Girls",
+      name: 'Girls',
       count: girls,
-      fill: "#FAE27C",
+      fill: '#FAE27C',
     },
     {
-      name: "Boys",
+      name: 'Boys',
       count: boys,
-      fill: "#C3EBFA",
+      fill: '#C3EBFA',
     },
   ];
   return (
     <div className="relative w-full h-[75%]">
-      <ResponsiveContainer>
+      <ResponsiveContainer width="100%" height="100%">
         <RadialBarChart
           cx="50%"
           cy="50%"
