@@ -306,8 +306,8 @@ GUIDELINES:
           )
         : 0;
     const presentCount = attendanceStats.find((a) => a.present)?._count || 0;
-    const absentCount = attendanceStats.find((a) => !a.present)?._count || 0;
-    const totalAttendance = presentCount + absentCount;
+    const _absentCount = attendanceStats.find((a) => !a.present)?._count || 0;
+    const totalAttendance = presentCount + _absentCount;
 
     const classStats = await prisma.class.findMany({
       include: {
