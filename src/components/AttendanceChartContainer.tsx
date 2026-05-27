@@ -1,7 +1,14 @@
 import Image from 'next/image';
-import AttendanceChart from './AttendanceChart';
+import dynamic from 'next/dynamic';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
+
+const AttendanceChart = dynamic(() => import('./AttendanceChart'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[75%] bg-gray-50 animate-pulse rounded-lg" />
+  ),
+});
 
 const AttendanceChartContainer = async () => {
   const today = new Date();
@@ -16,13 +23,14 @@ const AttendanceChartContainer = async () => {
   });
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-  const attendanceMap: { [key: string]: { present: number; absent: number } } = {
-    Mon: { present: 0, absent: 0 },
-    Tue: { present: 0, absent: 0 },
-    Wed: { present: 0, absent: 0 },
-    Thu: { present: 0, absent: 0 },
-    Fri: { present: 0, absent: 0 },
-  };
+  const attendanceMap: { [key: string]: { present: number; absent: number } } =
+    {
+      Mon: { present: 0, absent: 0 },
+      Tue: { present: 0, absent: 0 },
+      Wed: { present: 0, absent: 0 },
+      Thu: { present: 0, absent: 0 },
+      Fri: { present: 0, absent: 0 },
+    };
 
   resData.forEach((item) => {
     const itemDate = new Date(item.date);
@@ -45,7 +53,13 @@ const AttendanceChartContainer = async () => {
       <div className="flex justify-between items-center">
         <h1 className="text-lg font-semibold">Attendance</h1>
         <Link href="/list/attendance">
-          <Image src="/moreDark.png" alt="" width={20} height={20} className="cursor-pointer hover:opacity-70 transition-opacity" />
+          <Image
+            src="/moreDark.png"
+            alt=""
+            width={20}
+            height={20}
+            className="cursor-pointer hover:opacity-70 transition-opacity"
+          />
         </Link>
       </div>
       <AttendanceChart data={data} />
