@@ -25,6 +25,5 @@ ENV PORT=3000
 RUN npm run build
 
 # 9. Pornim aplicația în modul de producție
-CMD ["npm", "start"]
-
+RUN npm run build
 CMD npx prisma migrate deploy && npm start
