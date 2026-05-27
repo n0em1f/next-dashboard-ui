@@ -26,4 +26,4 @@ RUN npm run build
 
 # 9. Pornim aplicația în modul de producție
 RUN npm run build
-CMD npx prisma migrate deploy && npm start
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
