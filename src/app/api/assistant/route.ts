@@ -188,7 +188,7 @@ GUIDELINES:
       },
     });
 
-    const classIds = [...new Set(myLessons.map((l) => l.classId))];
+    const classIds = Array.from(new Set(myLessons.map((l) => l.classId)));
     const studentStats = await prisma.student.findMany({
       where: { classId: { in: classIds } },
       include: {
