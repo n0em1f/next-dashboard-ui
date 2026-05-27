@@ -13,14 +13,17 @@ const StudentPage = async () => {
     },
   });
 
-  console.log('classItem:', classItem);
   return (
     <div className="p-4 flex gap-4 flex-col xl:flex-row">
       {/* LEFT */}
       <div className="w-full xl:w-2/3">
-        <div className="h-full bg-white p-4 rounded-md">
-          <h1 className="text-xl font-semibold">Schedule (4A)</h1>
-          <BigCalendarContainer type="classId" id={classItem[0].id} />
+        <div className="h-full bg-white/90 backdrop-blur-sm p-4 rounded-md">
+          <h1 className="text-xl font-semibold">Schedule</h1>
+          {classItem[0] ? (
+            <BigCalendarContainer type="classId" id={classItem[0].id} />
+          ) : (
+            <p className="text-gray-500 mt-4">No class assigned yet.</p>
+          )}
         </div>
       </div>
       {/* RIGHT */}

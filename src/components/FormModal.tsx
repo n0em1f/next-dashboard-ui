@@ -6,16 +6,20 @@ import {
   deleteStudent,
   deleteSubject,
   deleteTeacher,
+  deleteLesson,
+  deleteAssignment,
+  deleteResult,
+  deleteAttendance,
+  deleteEvent,
+  deleteAnnouncement,
+  deleteParent,
 } from '@/lib/actions';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useFormState } from 'react-dom';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { toast } from 'react-toastify';
 import { FormContainerProps } from './FormContainer';
-// import TeacherForm from './forms/TeacherForm';
-// import StudentForm from './forms/StudentForm';
 
 const deleteActionMap = {
   subject: deleteSubject,
@@ -23,60 +27,49 @@ const deleteActionMap = {
   teacher: deleteTeacher,
   student: deleteStudent,
   exam: deleteExam,
-  parent: deleteSubject,
-  lesson: deleteSubject,
-  assignment: deleteSubject,
-  result: deleteSubject,
-  attendance: deleteSubject,
-  event: deleteSubject,
-  announcement: deleteSubject,
+  parent: deleteParent,
+  lesson: deleteLesson,
+  assignment: deleteAssignment,
+  result: deleteResult,
+  attendance: deleteAttendance,
+  event: deleteEvent,
+  announcement: deleteAnnouncement,
 };
 
-//USE LAZY LOADING
-
+// LAZY LOADING
 const TeacherForm = dynamic(() => import('./forms/TeacherForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const StudentForm = dynamic(() => import('./forms/StudentForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const SubjectForm = dynamic(() => import('./forms/SubjectForm'), {
   loading: () => <h1>Loading...</h1>,
 });
 const ClassForm = dynamic(() => import('./forms/ClassForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const ParentForm = dynamic(() => import('./forms/ParentForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const LessonForm = dynamic(() => import('./forms/LessonForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const ExamForm = dynamic(() => import('./forms/ExamForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const AssignmentForm = dynamic(() => import('./forms/AssignmentForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const ResultForm = dynamic(() => import('./forms/ResultForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const AttendanceForm = dynamic(() => import('./forms/AttendanceForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const EventForm = dynamic(() => import('./forms/EventForm'), {
   loading: () => <h1>Loading...</h1>,
 });
-
 const AnnouncementForm = dynamic(() => import('./forms/AnnouncementForm'), {
   loading: () => <h1>Loading...</h1>,
 });
@@ -105,7 +98,9 @@ const forms: {
       relatedData={relatedData}
     />
   ),
-  // parent: (setOpen, type, data,relatedData) => <ParentForm type={type} data={data} relatedData={relatedData}/>,
+  parent: (setOpen, type, data) => (
+    <ParentForm type={type} data={data} setOpen={setOpen} />
+  ),
   subject: (setOpen, type, data, relatedData) => (
     <SubjectForm
       type={type}
@@ -130,13 +125,54 @@ const forms: {
       relatedData={relatedData}
     />
   ),
-  // lesson: (type, data) => <LessonForm type={type} data={data} />,
-
-  // assignment: (type, data) => <AssignmentForm type={type} data={data} />,
-  //result: (type, data) => <ResultForm type={type} data={data} />,
-  //attendance: (type, data) => <AttendanceForm type={type} data={data} />,
-  //event: (type, data) => <EventForm type={type} data={data} />,
-  //announcement: (type, data) => <AnnouncementForm type={type} data={data} />,
+  lesson: (setOpen, type, data, relatedData) => (
+    <LessonForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  assignment: (setOpen, type, data, relatedData) => (
+    <AssignmentForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  result: (setOpen, type, data, relatedData) => (
+    <ResultForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  attendance: (setOpen, type, data, relatedData) => (
+    <AttendanceForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  event: (setOpen, type, data, relatedData) => (
+    <EventForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  announcement: (setOpen, type, data, relatedData) => (
+    <AnnouncementForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
 };
 
 const FormModal = ({
@@ -156,32 +192,61 @@ const FormModal = ({
 
   const [open, setOpen] = useState(false);
 
-  const Form = () => {
-    const [state, formAction] = useFormState(deleteActionMap[table], {
-      success: false,
-      error: false,
-    });
+  const router = useRouter();
 
-    const router = useRouter();
+  const handleDelete = () => {
+    setOpen(false);
+    let cancelled = false;
 
-    useEffect(() => {
-      if (state.success) {
-        toast(`${table} has been deleted!`);
-        setOpen(false);
+    const toastId = toast(
+      ({ closeToast }) => (
+        <div className="flex items-center justify-between gap-4">
+          <span>
+            <strong>{table}</strong> will be deleted in 5 seconds...
+          </span>
+          <button
+            onClick={() => {
+              cancelled = true;
+              closeToast();
+              toast.success('Delete cancelled!');
+            }}
+            className="bg-white text-red-500 border border-red-500 px-2 py-1 rounded text-xs font-semibold hover:bg-red-50 transition-colors"
+          >
+            Undo
+          </button>
+        </div>
+      ),
+      { autoClose: 5000 },
+    );
+
+    setTimeout(async () => {
+      if (!cancelled) {
+        const formData = new FormData();
+        formData.append('id', String(id));
+        await deleteActionMap[table](
+          { success: false, error: false },
+          formData,
+        );
+        toast.dismiss(toastId);
+        toast.success(`${table} deleted successfully!`);
         router.refresh();
       }
-    }, [state, router]);
+    }, 5000);
+  };
 
+  const Form = () => {
     return type === 'delete' && id ? (
-      <form action={formAction} className="p-4 flex flex-col gap-4">
-        <input type="text | number" name="id" value={id} hidden />
+      <div className="p-4 flex flex-col gap-4">
         <span className="text-center font-medium">
           All data will be lost. Are you sure you want to delete this {table}?
         </span>
-        <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center">
+        <button
+          onClick={handleDelete}
+          className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
+        >
           Delete
         </button>
-      </form>
+      </div>
     ) : type === 'create' || type === 'update' ? (
       forms[table](setOpen, type, data, relatedData)
     ) : (

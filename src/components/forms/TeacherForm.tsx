@@ -34,14 +34,10 @@ const TeacherForm = ({
 
   const [state, formAction] = useFormState(
     type === 'create' ? createTeacher : updateTeacher,
-    {
-      success: false,
-      error: false,
-    },
+    { success: false, error: false, message: '' },
   );
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
     formAction({ ...data, img: img?.secure_url });
   });
 
@@ -132,7 +128,7 @@ const TeacherForm = ({
         <InputField
           label="Birthday"
           name="birthday"
-          defaultValue={data?.birthday.toISOString().split('T')[0]}
+          defaultValue={data?.birthday?.toISOString().split('T')[0]}
           register={register}
           error={errors.birthday}
           type="date"
@@ -186,22 +182,6 @@ const TeacherForm = ({
           )}
         </div>
 
-        {/* <div className="flex flex-col gap-2 w-full md:w-1/4 justify-center">
-          <label
-            className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-            htmlFor="img"
-          >
-            <Image src="/upload.png" alt="" width={28} height={28} />
-            <span>Upload a photo</span>
-          </label>
-          <input type="file" id="img" {...register('img')} className="hidden" />
-          {errors.img?.message && (
-            <p className="text-xs text-red-400">
-              {errors.img.message.toString()}
-            </p>
-          )}
-        </div> */}
-
         <CldUploadWidget
           uploadPreset="school"
           onSuccess={(result, { widget }) => {
@@ -209,22 +189,22 @@ const TeacherForm = ({
             widget.close();
           }}
         >
-          {({ open }) => {
-            return (
-              <div
-                className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-                onClick={() => open()}
-              >
-                <Image src="/upload.png" alt="" width={28} height={28} />
-                <span>Upload a photo</span>
-              </div>
-            );
-          }}
+          {({ open }) => (
+            <div
+              className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
+              onClick={() => open()}
+            >
+              <Image src="/upload.png" alt="" width={28} height={28} />
+              <span>Upload a photo</span>
+            </div>
+          )}
         </CldUploadWidget>
       </div>
 
       {state.error && (
-        <span className="text-red-500">Something went wrong...</span>
+        <span className="text-red-500">
+          {state.message || 'Something went wrong!'}
+        </span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
         {type === 'create' ? 'Create' : 'Update'}

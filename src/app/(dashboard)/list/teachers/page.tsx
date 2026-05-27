@@ -2,6 +2,7 @@ import FormContainer from '@/components/FormContainer';
 import Pagination from '@/components/Pagination';
 import Table from '@/components/Table';
 import TableSearch from '@/components/TableSearch';
+import FilterSortButtons from '@/components/FilterSortButtons';
 import prisma from '@/lib/prisma';
 import { ITEM_PER_PAGE } from '@/lib/settings';
 import { auth } from '@clerk/nextjs/server';
@@ -67,10 +68,10 @@ const TeacherListPage = async ({
       </td>
       <td className="hidden md:table-cell">{item.username}</td>
       <td className="hidden md:table-cell">
-        {item.subjects.map((subject) => subject.name).join(',')}
+        {item.subjects.map((s) => s.name).join(', ')}
       </td>
       <td className="hidden md:table-cell">
-        {item.classes.map((classItem) => classItem.name).join(',')}
+        {item.classes.map((c) => c.name).join(', ')}
       </td>
       <td className="hidden md:table-cell">{item.phone}</td>
       <td className="hidden md:table-cell">{item.address}</td>
@@ -89,26 +90,25 @@ const TeacherListPage = async ({
     </tr>
   );
 
-  const { page, ...queryParams } = searchParams;
+  const { page, sort, subjectId, classId, ...queryParams } = searchParams;
   const p = page ? parseInt(page) : 1;
   const query: Prisma.TeacherWhereInput = {};
 
-  if (queryParams) {
-    for (const [key, value] of Object.entries(queryParams)) {
-      if (value !== undefined) {
-        switch (key) {
-          case 'classId':
-            query.lessons = { some: { classId: parseInt(value) } };
-            break;
-          case 'search':
-            query.name = { contains: value, mode: 'insensitive' };
-            break;
-          default:
-            break;
-        }
-      }
-    }
-  }
+  if (queryParams.search)
+    query.name = { contains: queryParams.search, mode: 'insensitive' };
+  if (subjectId) query.subjects = { some: { id: parseInt(subjectId) } };
+  if (classId) query.classes = { some: { id: parseInt(classId) } };
+
+  const [subjects, classes] = await Promise.all([
+    prisma.subject.findMany({
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    }),
+    prisma.class.findMany({
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    }),
+  ]);
 
   const [data, count] = await prisma.$transaction([
     prisma.teacher.findMany({
@@ -116,6 +116,7 @@ const TeacherListPage = async ({
       include: { subjects: true, classes: true },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
+      orderBy: { name: sort === 'desc' ? 'desc' : 'asc' },
     }),
     prisma.teacher.count({ where: query }),
   ]);
@@ -127,12 +128,26 @@ const TeacherListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src={'/filter.png'} alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src={'/sort.png'} alt="" width={14} height={14} />
-            </button>
+            <FilterSortButtons
+              filterFields={[
+                {
+                  label: 'Subject',
+                  param: 'subjectId',
+                  options: subjects.map((s) => ({
+                    label: s.name,
+                    value: s.id.toString(),
+                  })),
+                },
+                {
+                  label: 'Class',
+                  param: 'classId',
+                  options: classes.map((c) => ({
+                    label: c.name,
+                    value: c.id.toString(),
+                  })),
+                },
+              ]}
+            />
             {role === 'admin' && (
               <FormContainer table="teacher" type="create" />
             )}
