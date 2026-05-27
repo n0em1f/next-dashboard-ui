@@ -1,4 +1,6 @@
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const runtime = 'nodejs';
 
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
