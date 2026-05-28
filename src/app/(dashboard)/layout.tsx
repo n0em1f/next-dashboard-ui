@@ -4,6 +4,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import AIAssistantContainer from '@/components/AIAssistantContainer';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 export default function DashboardLayout({
   children,
 }: Readonly<{

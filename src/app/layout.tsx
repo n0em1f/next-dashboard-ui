@@ -5,6 +5,9 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
