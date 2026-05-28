@@ -8,6 +8,8 @@ import { ITEM_PER_PAGE } from '@/lib/settings';
 import { auth } from '@clerk/nextjs/server';
 import { Announcement, Class, Prisma } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 type AnnouncementList = Announcement & { class: Class };
 
 const AnnouncementListPage = async ({
