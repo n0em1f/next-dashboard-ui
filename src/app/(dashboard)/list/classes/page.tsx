@@ -8,6 +8,8 @@ import { ITEM_PER_PAGE } from '@/lib/settings';
 import { auth } from '@clerk/nextjs/server';
 import { Class, Prisma, Teacher } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 type ClassList = Class & { supervisor: Teacher };
 
 const ClassListPage = async ({

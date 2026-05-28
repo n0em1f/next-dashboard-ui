@@ -8,6 +8,8 @@ import { ITEM_PER_PAGE } from '@/lib/settings';
 import { auth } from '@clerk/nextjs/server';
 import { Parent, Prisma, Student } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 type ParentList = Parent & { students: Student[] };
 
 const ParentListPage = async ({

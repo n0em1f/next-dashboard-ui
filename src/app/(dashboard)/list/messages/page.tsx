@@ -3,6 +3,8 @@ import { auth } from '@clerk/nextjs/server';
 import ChatClient from './ChatClient';
 import { markMessagesAsRead } from '@/lib/messageActions';
 
+export const dynamic = 'force-dynamic';
+
 const MessagesPage = async ({
   searchParams,
 }: {

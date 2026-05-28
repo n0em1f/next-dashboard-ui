@@ -8,6 +8,8 @@ import { ITEM_PER_PAGE } from '@/lib/settings';
 import { auth } from '@clerk/nextjs/server';
 import { Prisma } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 type ResultList = {
   id: number;
   title: string;

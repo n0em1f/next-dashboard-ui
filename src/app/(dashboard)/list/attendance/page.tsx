@@ -2,6 +2,8 @@ import prisma from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 import AttendanceClient from './AttendanceClient';
 
+export const dynamic = 'force-dynamic';
+
 const AttendancePage = async ({
   searchParams,
 }: {
