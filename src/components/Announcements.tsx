@@ -2,6 +2,8 @@ import prisma from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 const Announcements = async () => {
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
