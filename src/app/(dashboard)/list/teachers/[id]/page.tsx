@@ -9,6 +9,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 const SingleTeacherPage = async ({
   params: { id },
 }: {
@@ -140,7 +142,7 @@ const SingleTeacherPage = async ({
             </div>
 
             {/* CARD */}
-            
+
             <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[48%]">
               <Image
                 src="/singleClass.png"
