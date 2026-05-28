@@ -4,7 +4,7 @@ import CountChartContainer from '@/components/CountChartContainer';
 import EventCalendarContainer from '@/components/EventCalendarContainer';
 import FinanceChart from '@/components/FinanceChart';
 import UserCard from '@/components/UserCard';
-
+export const dynamic = 'force-dynamic';
 const AdminPage = ({
   searchParams,
 }: {
