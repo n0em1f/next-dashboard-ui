@@ -2,6 +2,8 @@
 import Image from 'next/image';
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 
+export const dynamic = 'force-dynamic';
+
 const data = [
   { name: 'Group A', value: 92, fill: '#C3EBFA' },
   { name: 'Group B', value: 8, fill: '#FAE27C' },

@@ -3,6 +3,8 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 const ProfilePage = async () => {
   const { userId, sessionClaims } = await auth();
   const clerkUser = await currentUser();

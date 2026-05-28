@@ -3,6 +3,8 @@
 import { useClerk } from '@clerk/nextjs';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+
 const LogoutButton = () => {
   const { signOut } = useClerk();
 

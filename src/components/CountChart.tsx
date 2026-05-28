@@ -7,6 +7,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+export const dynamic = 'force-dynamic';
+
 const CountChart = ({ boys, girls }: { boys: number; girls: number }) => {
   const data = [
     {

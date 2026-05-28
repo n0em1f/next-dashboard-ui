@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+
 type Message = { role: 'user' | 'assistant'; content: string };
 
 const quickQuestions: { [key: string]: string[] } = {

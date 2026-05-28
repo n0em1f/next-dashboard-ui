@@ -3,6 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import LogoutButton from './LogoutButton';
 
+export const dynamic = 'force-dynamic';
+
 const menuItems = [
   {
     title: 'MENU',

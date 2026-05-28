@@ -12,6 +12,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+export const dynamic = 'force-dynamic';
+
 const AttendanceChart = ({
   data,
 }: {

@@ -1,6 +1,8 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import AIAssistant from './AIAssistant';
 
+export const dynamic = 'force-dynamic';
+
 const AIAssistantContainer = async () => {
   const { sessionClaims } = await auth();
   const clerkUser = await currentUser();

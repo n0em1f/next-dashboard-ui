@@ -3,6 +3,8 @@
 import { ITEM_PER_PAGE } from '@/lib/settings';
 import { useRouter } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 const Pagination = ({ page, count }: { page: number; count: number }) => {
   const router = useRouter();
 

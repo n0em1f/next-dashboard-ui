@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { markNotificationRead } from '@/lib/notificationActions';
 
+export const dynamic = 'force-dynamic';
+
 type Announcement = {
   id: number;
   title: string;

@@ -6,6 +6,8 @@ import prisma from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 import NotificationsDropdown from './NotificationsDropdown';
 
+export const dynamic = 'force-dynamic';
+
 const Navbar = async () => {
   const user = await currentUser();
   const { userId } = await auth();
@@ -51,7 +53,7 @@ const Navbar = async () => {
         (n: { itemId: number; itemType: string }) =>
           n.itemType === 'announcement',
       )
-       .map((n: { itemId: number; itemType: string }) => n.itemId),
+      .map((n: { itemId: number; itemType: string }) => n.itemId),
   );
 
   const readEventIds = new Set(

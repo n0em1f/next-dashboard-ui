@@ -3,6 +3,8 @@ import EventCalendar from './EventCalendar';
 import EventList from './EventList';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 const EventCalendarContainer = async ({
   searchParams,
 }: {

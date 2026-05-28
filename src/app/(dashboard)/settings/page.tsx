@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { toast } from 'react-toastify';
 
+export const dynamic = 'force-dynamic';
+
 const SettingsPage = () => {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();

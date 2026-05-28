@@ -5,6 +5,8 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useState } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 const localizer = momentLocalizer(moment);
 
 const BigCalendar = ({

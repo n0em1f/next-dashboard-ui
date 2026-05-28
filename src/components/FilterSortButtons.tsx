@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 type FilterField = {
   label: string; // ex: "Class", "Subject", "Teacher"
   param: string; // ex: "classId", "subjectId"

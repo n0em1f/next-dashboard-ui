@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 const TableSearch = () => {
   const router = useRouter();
 

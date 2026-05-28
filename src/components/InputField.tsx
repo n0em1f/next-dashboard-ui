@@ -1,5 +1,7 @@
 import { FieldError } from 'react-hook-form';
 
+export const dynamic = 'force-dynamic';
+
 type InputFieldProps = {
   label: string;
   type?: string;

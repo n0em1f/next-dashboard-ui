@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import FormModal from './FormModal';
 import { auth } from '@clerk/nextjs/server';
 
+export const dynamic = 'force-dynamic';
 export type FormContainerProps = {
   table:
     | 'teacher'
