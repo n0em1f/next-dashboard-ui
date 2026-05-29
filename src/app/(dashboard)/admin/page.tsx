@@ -1,16 +1,35 @@
+'use client'; // Forțăm execuția pe client pentru a alinia starea cu browserul
+
+import { useEffect, useState } from 'react';
 import Announcements from '@/components/Announcements';
 import AttendanceChartContainer from '@/components/AttendanceChartContainer';
 import CountChartContainer from '@/components/CountChartContainer';
 import EventCalendarContainer from '@/components/EventCalendarContainer';
 import FinanceChart from '@/components/FinanceChart';
 import UserCard from '@/components/UserCard';
-export const dynamic = 'force-dynamic';
 
 const AdminPage = ({
   searchParams,
 }: {
   searchParams: { [keys: string]: string | undefined };
 }) => {
+  const [isClient, setIsClient] = useState(false);
+
+  // useEffect se execută DOAR când pagina a ajuns cu succes în browser
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Cât timp Next.js compilează pe server, arătăm un ecran curat de încărcare
+  // Asta oprește instant toate erorile de Hydration și problemele de dimensiune ale graficelor
+  if (!isClient) {
+    return (
+      <div className="p-4 w-full h-screen flex items-center justify-center text-gray-500 font-medium">
+        Se încarcă panoul de administrare...
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 flex gap-4 flex-col md:flex-row">
       {/* LEFT */}

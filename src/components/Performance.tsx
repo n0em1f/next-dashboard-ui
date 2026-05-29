@@ -16,7 +16,7 @@ const Performance = () => {
         <h1 className="text-xl font-semibold">Performance</h1>
         <Image src="/moreDark.png" alt="" width={16} height={16} />
       </div>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
             dataKey="value"

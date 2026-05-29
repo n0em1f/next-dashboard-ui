@@ -445,6 +445,7 @@ GUIDELINES: Be warm, supportive, explain academic terms simply, respond in the s
   );
 
   const data = await response.json();
+  console.log('Gemini response:', JSON.stringify(data));
   const content =
     data.candidates?.[0]?.content?.parts?.[0]?.text ||
     'Sorry, I could not get a response.';
