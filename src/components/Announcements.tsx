@@ -27,6 +27,13 @@ const Announcements = async () => {
     },
   });
 
+  // Culorile de fundal pentru cele 3 anunțuri
+  const bgColors = [
+    'bg-lamaSkyLight',
+    'bg-lamaPurpleLight',
+    'bg-lamaYellowLight',
+  ];
+
   return (
     <div className="bg-white p-4 rounded-md">
       <div className="flex items-center justify-between">
@@ -39,38 +46,28 @@ const Announcements = async () => {
         </Link>
       </div>
       <div className="flex flex-col gap-4 mt-4">
-        {data[0] && (
-          <div className="bg-lamaSkyLight rounded-md p-4">
+        {data.map((item, index) => (
+          <div
+            key={item.id}
+            className={`${bgColors[index % bgColors.length]} rounded-md p-4`}
+          >
             <div className="flex items-center justify-between">
-              <h2 className="font-medium">{data[0].title}</h2>
-              <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
-                {new Intl.DateTimeFormat('ro-RO').format(data[0].date)}
+              <h2 className="font-medium">{item.title}</h2>
+              {/* suppressHydrationWarning oprește crash-ul din browser cauzat de diferențele de fus orar dintre serverul Vercel și laptop */}
+              <span
+                suppressHydrationWarning
+                className="text-xs text-gray-400 bg-white rounded-md px-1 py-1"
+              >
+                {new Date(item.date).toLocaleDateString('ro-RO')}
               </span>
             </div>
-            <p className="text-sm text-gray-400 mt-1">{data[0].description}</p>
+            <p className="text-sm text-gray-400 mt-1">{item.description}</p>
           </div>
-        )}
-        {data[1] && (
-          <div className="bg-lamaPurpleLight rounded-md p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-medium">{data[1].title}</h2>
-              <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
-                {new Intl.DateTimeFormat('ro-RO').format(data[1].date)}
-              </span>
-            </div>
-            <p className="text-sm text-gray-400 mt-1">{data[1].description}</p>
-          </div>
-        )}
-        {data[2] && (
-          <div className="bg-lamaYellowLight rounded-md p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-medium">{data[2].title}</h2>
-              <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
-                {new Intl.DateTimeFormat('ro-RO').format(data[2].date)}
-              </span>
-            </div>
-            <p className="text-sm text-gray-400 mt-1">{data[2].description}</p>
-          </div>
+        ))}
+        {data.length === 0 && (
+          <p className="text-sm text-gray-400 text-center py-4">
+            Nu există anunțuri recente.
+          </p>
         )}
       </div>
     </div>
