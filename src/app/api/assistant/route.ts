@@ -898,7 +898,8 @@ GUIDELINES: Be warm, supportive, explain academic terms simply, respond in the s
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
+          // CORECTAT: systemInstruction (cu camelCase) în loc de system_instruction
+          systemInstruction: { parts: [{ text: systemPrompt }] },
           contents: geminiMessages,
           generationConfig: {
             maxOutputTokens: 1500,
@@ -911,24 +912,23 @@ GUIDELINES: Be warm, supportive, explain academic terms simply, respond in the s
     const data = await response.json();
     console.log('Gemini raw response:', JSON.stringify(data));
 
-    // Verificăm dacă Google a returnat o eroare directă (ex: cheie invalida/blocata)
+    // Verificăm dacă Google a returnat o eroare directă
     if (data.error) {
       console.error('Gemini API Error:', data.error.message);
       return NextResponse.json({
-        content: `Eroare API Gemini: ${data.error.message}. Verifică GEMINI_API_KEY în Vercel Settings.`,
+        content: `Eroare API Gemini: ${data.error.message}. Verifică configurarea în route.ts.`,
       });
     }
 
     const content =
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      'Scuze, dar modelul AI nu a putut genera un răspuns text valid.';
+      'Scuze, maar modelul AI nu a putut genera un răspuns text valid.';
 
     return NextResponse.json({ content });
   } catch (error) {
     console.error('Fetch error la comunicarea cu Gemini:', error);
     return NextResponse.json({
-      content:
-        'A apărut o eroare de rețea. Asigură-te că serverul are conexiune la internet și variabila este setată.',
+      content: 'A apărut o eroare de rețea la comunicarea cu API-ul Gemini.',
     });
   }
 }
