@@ -873,32 +873,30 @@ GUIDELINES: Be warm, supportive, explain academic terms simply, respond in the s
   }
 
   // ========================================================
-  // MAPARE ȘI SECURIZARE ISTORIC MESAJE PENTRU GEMINI
+  // FORMATRE ȘI VALIDARE MESAJE PENTRU GOOGLE GEMINI
   // ========================================================
   let geminiMessages = messages.map((m: { role: string; content: string }) => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],
   }));
 
-  // Gemini dă eroare dacă istoricul nu începe obligatoriu cu un mesaj de la utilizator ('user')
+  // Regulă Gemini: Vectorul de mesaje trebuie să înceapă obligatoriu cu 'user'
   if (geminiMessages.length > 0 && geminiMessages[0].role === 'model') {
     geminiMessages.shift();
   }
 
-  // Fallback în caz că array-ul devine complet gol
   if (geminiMessages.length === 0) {
     geminiMessages = [{ role: 'user', parts: [{ text: 'Hello' }] }];
   }
 
-  // Apelăm API-ul Google Gemini securizat într-un bloc try/catch
+  // Apelăm Google Gemini folosind varianta stabilă v1beta + systemInstruction
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          // CORECTAT: systemInstruction (cu camelCase) în loc de system_instruction
           systemInstruction: { parts: [{ text: systemPrompt }] },
           contents: geminiMessages,
           generationConfig: {
@@ -910,25 +908,23 @@ GUIDELINES: Be warm, supportive, explain academic terms simply, respond in the s
     );
 
     const data = await response.json();
-    console.log('Gemini raw response:', JSON.stringify(data));
 
-    // Verificăm dacă Google a returnat o eroare directă
     if (data.error) {
       console.error('Gemini API Error:', data.error.message);
       return NextResponse.json({
-        content: `Eroare API Gemini: ${data.error.message}. Verifică configurarea în route.ts.`,
+        content: `Eroare API Gemini: ${data.error.message}`,
       });
     }
 
     const content =
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      'Scuze, maar modelul AI nu a putut genera un răspuns text valid.';
+      'Scuze, dar modelul AI nu a putut genera un răspuns text valid.';
 
     return NextResponse.json({ content });
   } catch (error) {
     console.error('Fetch error la comunicarea cu Gemini:', error);
     return NextResponse.json({
-      content: 'A apărut o eroare de rețea la comunicarea cu API-ul Gemini.',
+      content: 'A apărut o eroare de rețea la comunicarea cu asistentul AI.',
     });
   }
 }
