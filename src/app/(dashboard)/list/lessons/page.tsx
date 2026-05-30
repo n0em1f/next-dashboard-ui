@@ -31,7 +31,7 @@ const LessonListPage = async ({
       className: 'hidden md:table-cell',
     },
     { header: 'PDF', accessor: 'pdf' },
-    ...(role === 'admin' ? [{ header: 'Actions', accessor: 'action' }] : []),
+    ...(role === 'admin' || role === 'teacher' ? [{ header: 'Actions', accessor: 'action' }] : []),
   ];
 
   const renderRow = (item: LessonList) => (
@@ -166,7 +166,10 @@ const LessonListPage = async ({
                 },
               ]}
             />
-            {role === 'admin' && <FormModal table="lesson" type="create" />}
+            {role === 'admin' ||
+              (role === 'teacher' && (
+                <FormModal table="lesson" type="create" />
+              ))}
           </div>
         </div>
       </div>

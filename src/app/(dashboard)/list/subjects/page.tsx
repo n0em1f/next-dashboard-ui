@@ -95,9 +95,10 @@ const SubjectListPage = async ({
                 },
               ]}
             />
-            {role === 'admin' && (
-              <FormContainer table="subject" type="create" />
-            )}
+            {role === 'admin' ||
+              (role === 'teacher' && (
+                <FormContainer table="subject" type="create" />
+              ))}
           </div>
         </div>
       </div>
