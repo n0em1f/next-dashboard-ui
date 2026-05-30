@@ -31,7 +31,9 @@ const LessonListPage = async ({
       className: 'hidden md:table-cell',
     },
     { header: 'PDF', accessor: 'pdf' },
-    ...(role === 'admin' || role === 'teacher' ? [{ header: 'Actions', accessor: 'action' }] : []),
+    ...(role === 'admin' || role === 'teacher'
+      ? [{ header: 'Actions', accessor: 'action' }]
+      : []),
   ];
 
   const renderRow = (item: LessonList) => (
@@ -45,28 +47,34 @@ const LessonListPage = async ({
         {item.teacher.name + ' ' + item.teacher.surname}
       </td>
       <td>
-        {item.fileUrl ? (
-          <div className="flex items-center gap-2">
-            <a
-              href={item.fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors"
-            >
-              📄 {item.fileName || 'PDF'}
-            </a>
-            <a
-              href={item.fileUrl}
-              download={item.fileName || 'lesson.pdf'}
-              className="inline-flex items-center gap-1 text-xs bg-gray-50 text-gray-600 border border-gray-200 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
-              title="Download"
-            >
-              ⬇
-            </a>
-          </div>
-        ) : (
-          <span className="text-xs text-gray-400">—</span>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Toți văd PDF-ul dacă există */}
+          {item.fileUrl && (
+            <>
+              <a
+                href={item.fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors"
+              >
+                📄 {item.fileName || 'PDF'}
+              </a>
+              <a
+                href={item.fileUrl}
+                download={item.fileName || 'lesson.pdf'}
+                className="inline-flex items-center gap-1 text-xs bg-gray-50 text-gray-600 border border-gray-200 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+                title="Download"
+              >
+                ⬇
+              </a>
+            </>
+          )}
+          {!item.fileUrl && <span className="text-xs text-gray-400">—</span>}
+          {/* Profesorul poate uploada pe lecțiile lui */}
+          {role === 'teacher' && item.teacherId === userId && (
+            <FormModal table="lesson" type="update" data={item} />
+          )}
+        </div>
       </td>
       <td>
         <div className="flex items-center gap-2">
@@ -75,9 +83,6 @@ const LessonListPage = async ({
               <FormModal table="lesson" type="update" data={item} />
               <FormModal table="lesson" type="delete" id={item.id} />
             </>
-          )}
-          {role === 'teacher' && item.teacherId === userId && (
-            <FormModal table="lesson" type="update" data={item} />
           )}
         </div>
       </td>
@@ -103,15 +108,6 @@ const LessonListPage = async ({
     ];
   if (classId) query.classId = parseInt(classId);
   if (teacherId) query.teacherId = teacherId;
-
-  if (role === 'teacher') query.teacherId = userId!;
-  if (role === 'student') {
-    const student = await prisma.student.findUnique({
-      where: { id: userId! },
-      select: { classId: true },
-    });
-    if (student) query.classId = student.classId;
-  }
 
   const [classes, teachers] = await Promise.all([
     prisma.class.findMany({
@@ -166,10 +162,9 @@ const LessonListPage = async ({
                 },
               ]}
             />
-            {role === 'admin' ||
-              (role === 'teacher' && (
-                <FormModal table="lesson" type="create" />
-              ))}
+            {(role === 'admin' || role === 'teacher') && (
+              <FormModal table="lesson" type="create" />
+            )}
           </div>
         </div>
       </div>
