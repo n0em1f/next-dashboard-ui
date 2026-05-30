@@ -2,13 +2,11 @@ import FormContainer from '@/components/FormContainer';
 import Pagination from '@/components/Pagination';
 import Table from '@/components/Table';
 import TableSearch from '@/components/TableSearch';
-import FilterSortButtons from '@/components/FilterSortButtons';
 import prisma from '@/lib/prisma';
 import { ITEM_PER_PAGE } from '@/lib/settings';
-import { auth } from '@clerk/nextjs/server';
 import { Prisma, Subject, Teacher } from '@prisma/client';
-
-export const dynamic = 'force-dynamic';
+import Image from 'next/image';
+import { auth } from '@clerk/nextjs/server';
 
 type SubjectList = Subject & { teachers: Teacher[] };
 
@@ -17,7 +15,7 @@ const SubjectListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
-  const { sessionClaims } = await auth();
+  const { sessionClaims, userId } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
   const columns = [
@@ -37,15 +35,18 @@ const SubjectListPage = async ({
     >
       <td className="flex items-center gap-4 p-4">{item.name}</td>
       <td className="hidden md:table-cell">
-        {item.teachers.map((t) => t.name).join(', ')}
+        {item.teachers.map((teacher) => teacher.name).join(',')}
       </td>
       <td>
         <div className="flex items-center gap-2">
-          {(role === 'admin' || role === 'teacher') && (
+          {role === 'admin' && (
             <>
               <FormContainer table="subject" type="update" data={item} />
               <FormContainer table="subject" type="delete" id={item.id} />
             </>
+          )}
+          {role === 'teacher' && (
+            <FormContainer table="subject" type="update" data={item} />
           )}
         </div>
       </td>
@@ -54,11 +55,34 @@ const SubjectListPage = async ({
 
   const { page, sort, teacherId, ...queryParams } = searchParams;
   const p = page ? parseInt(page) : 1;
+
   const query: Prisma.SubjectWhereInput = {};
 
-  if (queryParams.search)
-    query.name = { contains: queryParams.search, mode: 'insensitive' };
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined) {
+        switch (key) {
+          case 'search':
+            query.name = { contains: value, mode: 'insensitive' };
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  // Filtrare după profesor
   if (teacherId) query.teachers = { some: { id: teacherId } };
+
+  // Studentul vede doar materiile clasei lui
+  if (role === 'student' && userId) {
+    const student = await prisma.student.findUnique({
+      where: { id: userId },
+      select: { classId: true },
+    });
+    if (student) query.lessons = { some: { classId: student.classId } };
+  }
 
   const teachers = await prisma.teacher.findMany({
     select: { id: true, name: true, surname: true },
@@ -83,19 +107,34 @@ const SubjectListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <FilterSortButtons
-              filterFields={[
-                {
-                  label: 'Teacher',
-                  param: 'teacherId',
-                  options: teachers.map((t) => ({
-                    label: `${t.name} ${t.surname}`,
-                    value: t.id,
-                  })),
-                },
-              ]}
-            />
-            {(role === 'admin' || role === 'teacher') && (
+            {/* Filter după profesor */}
+            <select
+              className="text-xs border border-gray-200 rounded-md px-2 py-1"
+              defaultValue={teacherId || ''}
+              onChange={(e) => {
+                const url = new URL(window.location.href);
+                if (e.target.value)
+                  url.searchParams.set('teacherId', e.target.value);
+                else url.searchParams.delete('teacherId');
+                window.location.href = url.toString();
+              }}
+            >
+              <option value="">All Teachers</option>
+              {teachers.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} {t.surname}
+                </option>
+              ))}
+            </select>
+            {/* Sort alfabetic */}
+            <a
+              href={`?sort=${sort === 'asc' ? 'desc' : 'asc'}${teacherId ? `&teacherId=${teacherId}` : ''}`}
+            >
+              <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
+                <Image src="/sort.png" alt="" width={14} height={14} />
+              </button>
+            </a>
+            {role === 'admin' && (
               <FormContainer table="subject" type="create" />
             )}
           </div>
