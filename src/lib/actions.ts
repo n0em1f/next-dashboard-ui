@@ -486,6 +486,8 @@ export const createLesson = async (currentState: CurrentState, data: any) => {
         subjectId: data.subjectId,
         classId: data.classId,
         teacherId: data.teacherId,
+        ...(data.fileUrl && { fileUrl: data.fileUrl }),
+        ...(data.fileName && { fileName: data.fileName }),
       },
     });
     return { success: true, error: false };
@@ -511,6 +513,8 @@ export const updateLesson = async (currentState: CurrentState, data: any) => {
         subjectId: data.subjectId,
         classId: data.classId,
         teacherId: data.teacherId,
+        fileUrl: data.fileUrl || null,
+        fileName: data.fileName || null,
       },
     });
     return { success: true, error: false };

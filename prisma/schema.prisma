@@ -108,6 +108,9 @@ model Lesson {
   startTime DateTime
   endTime   DateTime
 
+  fileUrl  String?
+  fileName String?
+
   subjectId   Int
   subject     Subject      @relation(fields: [subjectId], references: [id])
   classId     Int

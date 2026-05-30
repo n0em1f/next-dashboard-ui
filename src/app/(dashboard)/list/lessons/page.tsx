@@ -19,7 +19,7 @@ const LessonListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
-  const { sessionClaims } = await auth();
+  const { sessionClaims, userId } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
   const columns = [
@@ -30,7 +30,10 @@ const LessonListPage = async ({
       accessor: 'teacher',
       className: 'hidden md:table-cell',
     },
-    ...(role === 'admin' ? [{ header: 'Actions', accessor: 'action' }] : []),
+    { header: 'PDF', accessor: 'pdf' },
+    ...(role === 'admin' || role === 'teacher'
+      ? [{ header: 'Actions', accessor: 'action' }]
+      : []),
   ];
 
   const renderRow = (item: LessonList) => (
@@ -44,11 +47,40 @@ const LessonListPage = async ({
         {item.teacher.name + ' ' + item.teacher.surname}
       </td>
       <td>
+        {item.fileUrl ? (
+          <div className="flex items-center gap-2">
+            <a
+              href={item.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors"
+            >
+              <span>📄</span>
+              <span className="hidden sm:inline truncate max-w-[100px]">
+                {item.fileName || 'PDF'}
+              </span>
+            </a>
+            <a
+              href={item.fileUrl}
+              download={item.fileName || 'lesson.pdf'}
+              className="inline-flex items-center gap-1 text-xs bg-gray-50 text-gray-600 border border-gray-200 px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+              title="Download"
+            >
+              ⬇
+            </a>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-400">—</span>
+        )}
+      </td>
+      <td>
         <div className="flex items-center gap-2">
-          {role === 'admin' && (
+          {(role === 'admin' || role === 'teacher') && (
             <>
               <FormModal table="lesson" type="update" data={item} />
-              <FormModal table="lesson" type="delete" id={item.id} />
+              {role === 'admin' && (
+                <FormModal table="lesson" type="delete" id={item.id} />
+              )}
             </>
           )}
         </div>
@@ -75,6 +107,18 @@ const LessonListPage = async ({
     ];
   if (classId) query.classId = parseInt(classId);
   if (teacherId) query.teacherId = teacherId;
+
+  // Teachers see only their own lessons
+  if (role === 'teacher') query.teacherId = userId!;
+
+  // Students see only lessons for their class
+  if (role === 'student') {
+    const student = await prisma.student.findUnique({
+      where: { id: userId! },
+      select: { classId: true },
+    });
+    if (student) query.classId = student.classId;
+  }
 
   const [classes, teachers] = await Promise.all([
     prisma.class.findMany({
@@ -105,7 +149,9 @@ const LessonListPage = async ({
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Lessons</h1>
+        <h1 className="hidden md:block text-lg font-semibold">
+          {role === 'student' ? 'My Lessons' : 'All Lessons'}
+        </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
