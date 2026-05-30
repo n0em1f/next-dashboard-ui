@@ -31,9 +31,7 @@ const LessonListPage = async ({
       className: 'hidden md:table-cell',
     },
     { header: 'PDF', accessor: 'pdf' },
-    ...(role === 'admin' || role === 'teacher'
-      ? [{ header: 'Actions', accessor: 'action' }]
-      : []),
+    ...(role === 'admin' ? [{ header: 'Actions', accessor: 'action' }] : []),
   ];
 
   const renderRow = (item: LessonList) => (
@@ -55,10 +53,7 @@ const LessonListPage = async ({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors"
             >
-              <span>📄</span>
-              <span className="hidden sm:inline truncate max-w-[100px]">
-                {item.fileName || 'PDF'}
-              </span>
+              📄 {item.fileName || 'PDF'}
             </a>
             <a
               href={item.fileUrl}
@@ -75,13 +70,14 @@ const LessonListPage = async ({
       </td>
       <td>
         <div className="flex items-center gap-2">
-          {(role === 'admin' || role === 'teacher') && (
+          {role === 'admin' && (
             <>
               <FormModal table="lesson" type="update" data={item} />
-              {role === 'admin' && (
-                <FormModal table="lesson" type="delete" id={item.id} />
-              )}
+              <FormModal table="lesson" type="delete" id={item.id} />
             </>
+          )}
+          {role === 'teacher' && item.teacherId === userId && (
+            <FormModal table="lesson" type="update" data={item} />
           )}
         </div>
       </td>
