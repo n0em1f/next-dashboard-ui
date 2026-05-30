@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 type SubjectList = Subject & { teachers: Teacher[] };
 
-// ─── Student view ─────────────────────────────────────────────────────────────
+// ─── Student: carduri cu orar + PDF-uri, filtrabil după profesor ──────────────
 
 const StudentSubjectsView = async ({
   userId,
@@ -25,17 +25,22 @@ const StudentSubjectsView = async ({
     where: { id: userId },
     select: { classId: true },
   });
-
   if (!student) return <p className="text-gray-500 p-4">Student not found.</p>;
+
+  const allTeachers = await prisma.teacher.findMany({
+    where: { lesons: { some: { classId: student.classId } } },
+    select: { id: true, name: true, surname: true },
+    orderBy: { name: 'asc' },
+  });
 
   const subjects = await prisma.subject.findMany({
     where: {
-      lessons: { some: { classId: student.classId } },
+      lesons: { some: { classId: student.classId } },
       ...(teacherId ? { teachers: { some: { id: teacherId } } } : {}),
     },
     include: {
       teachers: { select: { id: true, name: true, surname: true } },
-      lessons: {
+      lesons: {
         where: { classId: student.classId },
         select: {
           id: true,
@@ -62,19 +67,32 @@ const StudentSubjectsView = async ({
   };
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <h1 className="text-lg font-semibold">My Subjects</h1>
+    <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="hidden md:block text-lg font-semibold">My Subjects</h1>
+        <FilterSortButtons
+          filterFields={[
+            {
+              label: 'Teacher',
+              param: 'teacherId',
+              options: allTeachers.map((t) => ({
+                label: `${t.name} ${t.surname}`,
+                value: t.id,
+              })),
+            },
+          ]}
+        />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {subjects.map((subject) => {
-          const sortedLessons = [...subject.lessons].sort(
+          const sorted = [...subject.lesons].sort(
             (a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day),
           );
-          const lessonsWithPdf = sortedLessons.filter((l) => l.fileUrl);
-
+          const withPdf = sorted.filter((l) => l.fileUrl);
           return (
             <div
               key={subject.id}
-              className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-3 shadow-sm"
+              className="border border-gray-200 rounded-xl p-4 flex flex-col gap-3 shadow-sm"
             >
               <div>
                 <h2 className="font-semibold text-gray-800">{subject.name}</h2>
@@ -84,31 +102,25 @@ const StudentSubjectsView = async ({
                     .join(', ')}
                 </p>
               </div>
-
-              {/* Orar */}
-              {sortedLessons.length > 0 && (
+              {sorted.length > 0 && (
                 <div className="flex flex-col gap-1">
                   <p className="text-xs text-gray-400 uppercase tracking-wide">
                     Schedule
                   </p>
-                  {sortedLessons.map((lesson) => (
+                  {sorted.map((l) => (
                     <div
-                      key={lesson.id}
+                      key={l.id}
                       className="flex items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-md px-2 py-1"
                     >
-                      <span className="font-medium w-8">
-                        {dayLabel[lesson.day]}
-                      </span>
-                      <span className="flex-1 truncate px-2">
-                        {lesson.name}
-                      </span>
+                      <span className="font-medium w-8">{dayLabel[l.day]}</span>
+                      <span className="flex-1 truncate px-2">{l.name}</span>
                       <span className="text-gray-400 whitespace-nowrap">
-                        {new Date(lesson.startTime).toLocaleTimeString(
-                          'en-GB',
-                          { hour: '2-digit', minute: '2-digit' },
-                        )}
+                        {new Date(l.startTime).toLocaleTimeString('en-GB', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                         –
-                        {new Date(lesson.endTime).toLocaleTimeString('en-GB', {
+                        {new Date(l.endTime).toLocaleTimeString('en-GB', {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
@@ -117,24 +129,22 @@ const StudentSubjectsView = async ({
                   ))}
                 </div>
               )}
-
-              {/* PDF-uri */}
-              {lessonsWithPdf.length > 0 && (
+              {withPdf.length > 0 && (
                 <div className="flex flex-col gap-1">
                   <p className="text-xs text-gray-400 uppercase tracking-wide">
                     Materials
                   </p>
-                  {lessonsWithPdf.map((lesson) => (
+                  {withPdf.map((l) => (
                     <div
-                      key={lesson.id}
+                      key={l.id}
                       className="flex items-center gap-2 bg-blue-50 rounded-md px-2 py-1.5"
                     >
                       <span className="text-blue-500">📄</span>
                       <span className="text-xs text-blue-800 flex-1 truncate">
-                        {lesson.fileName || lesson.name}
+                        {l.fileName || l.name}
                       </span>
                       <a
-                        href={lesson.fileUrl!}
+                        href={l.fileUrl!}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-blue-600 hover:underline"
@@ -143,8 +153,8 @@ const StudentSubjectsView = async ({
                       </a>
                       <span className="text-gray-300">·</span>
                       <a
-                        href={lesson.fileUrl!}
-                        download={lesson.fileName || 'lesson.pdf'}
+                        href={l.fileUrl!}
+                        download={l.fileName || 'lesson.pdf'}
                         className="text-xs text-blue-600 hover:underline"
                       >
                         Download
@@ -153,10 +163,9 @@ const StudentSubjectsView = async ({
                   ))}
                 </div>
               )}
-
-              {lessonsWithPdf.length === 0 && (
+              {withPdf.length === 0 && (
                 <p className="text-xs text-gray-400 italic">
-                  No materials uploaded yet.
+                  No materials yet.
                 </p>
               )}
             </div>
@@ -167,7 +176,7 @@ const StudentSubjectsView = async ({
   );
 };
 
-// ─── Teacher view ─────────────────────────────────────────────────────────────
+// ─── Teacher: orarul lui, filtrabil după clasă, cu upload PDF pe fiecare lecție ─
 
 const TeacherSubjectsView = async ({
   userId,
@@ -176,6 +185,12 @@ const TeacherSubjectsView = async ({
   userId: string;
   classId?: string;
 }) => {
+  const myClasses = await prisma.class.findMany({
+    where: { lessons: { some: { teacherId: userId } } },
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  });
+
   const lessons = await prisma.lesson.findMany({
     where: {
       teacherId: userId,
@@ -183,15 +198,9 @@ const TeacherSubjectsView = async ({
     },
     include: {
       subject: { select: { name: true } },
-      class: { select: { id: true, name: true } },
+      class: { select: { name: true } },
     },
     orderBy: [{ day: 'asc' }, { startTime: 'asc' }],
-  });
-
-  const classes = await prisma.class.findMany({
-    where: { lessons: { some: { teacherId: userId } } },
-    select: { id: true, name: true },
-    orderBy: { name: 'asc' },
   });
 
   const dayOrder = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
@@ -202,8 +211,6 @@ const TeacherSubjectsView = async ({
     THURSDAY: 'Thursday',
     FRIDAY: 'Friday',
   };
-
-  // Grupează lecțiile pe zi
   const byDay = dayOrder.reduce(
     (acc, day) => {
       acc[day] = lessons.filter((l) => l.day === day);
@@ -213,33 +220,30 @@ const TeacherSubjectsView = async ({
   );
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">My Schedule</h1>
-        <div className="flex items-center gap-4">
-          <FilterSortButtons
-            filterFields={[
-              {
-                label: 'Class',
-                param: 'classId',
-                options: classes.map((c) => ({
-                  label: c.name,
-                  value: c.id.toString(),
-                })),
-              },
-            ]}
-          />
-        </div>
+    <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="hidden md:block text-lg font-semibold">My Schedule</h1>
+        <FilterSortButtons
+          filterFields={[
+            {
+              label: 'Class',
+              param: 'classId',
+              options: myClasses.map((c) => ({
+                label: c.name,
+                value: c.id.toString(),
+              })),
+            },
+          ]}
+        />
       </div>
-
       <div className="flex flex-col gap-3">
         {dayOrder.map((day) => {
-          const dayLessons = byDay[day];
-          if (dayLessons.length === 0) return null;
+          const list = byDay[day];
+          if (!list.length) return null;
           return (
             <div
               key={day}
-              className="bg-white border border-gray-200 rounded-xl overflow-hidden"
+              className="border border-gray-200 rounded-xl overflow-hidden"
             >
               <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -247,13 +251,13 @@ const TeacherSubjectsView = async ({
                 </p>
               </div>
               <div className="divide-y divide-gray-100">
-                {dayLessons.map((lesson) => (
+                {list.map((lesson) => (
                   <div
                     key={lesson.id}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between px-4 py-3"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-400 whitespace-nowrap w-24">
+                      <span className="text-xs text-gray-400 whitespace-nowrap w-28">
                         {new Date(lesson.startTime).toLocaleTimeString(
                           'en-GB',
                           { hour: '2-digit', minute: '2-digit' },
@@ -273,18 +277,17 @@ const TeacherSubjectsView = async ({
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2">
                       {lesson.fileUrl && (
                         <a
                           href={lesson.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors"
+                          className="text-xs text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1 rounded-md hover:bg-blue-100"
                         >
                           📄 PDF
                         </a>
                       )}
-                      {/* Buton upload PDF — folosește FormModal cu type update */}
                       <FormContainer
                         table="lesson"
                         type="update"
@@ -297,16 +300,15 @@ const TeacherSubjectsView = async ({
             </div>
           );
         })}
-
         {lessons.length === 0 && (
-          <p className="text-gray-500 text-sm">No lessons found.</p>
+          <p className="text-sm text-gray-500">No lessons found.</p>
         )}
       </div>
     </div>
   );
 };
 
-// ─── Admin view (original) ────────────────────────────────────────────────────
+// ─── Admin: tabelul original neatins ─────────────────────────────────────────
 
 const SubjectListPage = async ({
   searchParams,
@@ -316,21 +318,16 @@ const SubjectListPage = async ({
   const { sessionClaims, userId } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
-  // Student view
-  if (role === 'student' && userId) {
+  if (role === 'student' && userId)
     return (
       <StudentSubjectsView userId={userId} teacherId={searchParams.teacherId} />
     );
-  }
 
-  // Teacher view
-  if (role === 'teacher' && userId) {
+  if (role === 'teacher' && userId)
     return (
       <TeacherSubjectsView userId={userId} classId={searchParams.classId} />
     );
-  }
 
-  // Admin view — tabelul original
   const columns = [
     { header: 'Subject Name', accessor: 'name' },
     {

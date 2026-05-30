@@ -104,10 +104,7 @@ const LessonListPage = async ({
   if (classId) query.classId = parseInt(classId);
   if (teacherId) query.teacherId = teacherId;
 
-  // Teachers see only their own lessons
   if (role === 'teacher') query.teacherId = userId!;
-
-  // Students see only lessons for their class
   if (role === 'student') {
     const student = await prisma.student.findUnique({
       where: { id: userId! },
@@ -145,9 +142,7 @@ const LessonListPage = async ({
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">
-          {role === 'student' ? 'My Lessons' : 'All Lessons'}
-        </h1>
+        <h1 className="hidden md:block text-lg font-semibold">All Lessons</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
