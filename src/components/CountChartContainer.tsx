@@ -34,7 +34,8 @@ const CountChartContainer = async () => {
           <div className="w-5 h-5 bg-lamaSky rounded-full" />
           <h1 className="font-bold">{boys}</h1>
           <h2 className="text-xs text-gray-300">
-            Boys ({Math.round((boys / (boys + girls)) * 100)}%)
+            Boys (
+            {boys + girls > 0 ? Math.round((boys / (boys + girls)) * 100) : 0}%)
           </h2>
         </div>
         <div className="flex flex-col gap-1">
