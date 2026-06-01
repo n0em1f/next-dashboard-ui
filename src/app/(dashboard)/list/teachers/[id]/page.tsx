@@ -61,7 +61,7 @@ const SingleTeacherPage = async ({
                 )}
               </div>
               <p className="text-sm text-gray-500">
-                {teacher.description || 'No description provided.'}
+                {(teacher as any).description || 'No description provided.'}
               </p>
               <div className="flex items-center justify-between gap-2 flex-wrap text-xs font-medium">
                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
