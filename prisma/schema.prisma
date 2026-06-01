@@ -1,11 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
-  //output   = "../src/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -19,44 +14,46 @@ model Admin {
 }
 
 model Student {
-  id         String       @id
-  username   String       @unique
-  name       String
-  surname    String
-  email      String?      @unique
-  phone      String?      @unique
-  address    String
-  img        String?
-  bloodType  String
-  sex        UserSex
-  createdAt  DateTime     @default(now())
-  parentId   String
-  parent     Parent       @relation(fields: [parentId], references: [id])
-  classId    Int
-  class      Class        @relation(fields: [classId], references: [id])
-  gradeId    Int
-  grade      Grade        @relation(fields: [gradeId], references: [id])
-  attendance Attendance[]
-  results    Result[]
-  birthday   DateTime
+  id          String       @id
+  username    String       @unique
+  name        String
+  surname     String
+  email       String?      @unique
+  phone       String?      @unique
+  address     String
+  img         String?
+  description String?
+  bloodType   String
+  sex         UserSex
+  createdAt   DateTime     @default(now())
+  parentId    String
+  parent      Parent       @relation(fields: [parentId], references: [id])
+  classId     Int
+  class       Class        @relation(fields: [classId], references: [id])
+  gradeId     Int
+  grade       Grade        @relation(fields: [gradeId], references: [id])
+  attendance  Attendance[]
+  results     Result[]
+  birthday    DateTime
 }
 
 model Teacher {
-  id        String    @id
-  username  String    @unique
-  name      String
-  surname   String
-  email     String?   @unique
-  phone     String?   @unique
-  address   String
-  img       String?
-  bloodType String
-  sex       UserSex
-  createdAt DateTime  @default(now())
-  subjects  Subject[]
-  lessons   Lesson[]
-  classes   Class[]
-  birthday  DateTime
+  id          String    @id
+  username    String    @unique
+  name        String
+  surname     String
+  email       String?   @unique
+  phone       String?   @unique
+  address     String
+  img         String?
+  description String?
+  bloodType   String
+  sex         UserSex
+  createdAt   DateTime  @default(now())
+  subjects    Subject[]
+  lessons     Lesson[]
+  classes     Class[]
+  birthday    DateTime
 }
 
 model Parent {
@@ -72,18 +69,16 @@ model Parent {
 }
 
 model Grade {
-  id    Int @id @default(autoincrement())
-  level Int @unique
-
+  id       Int       @id @default(autoincrement())
+  level    Int       @unique
   students Student[]
   classes  Class[]
 }
 
 model Class {
-  id       Int    @id @default(autoincrement())
-  name     String @unique
-  capacity Int
-
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  capacity      Int
   supervisorId  String?
   supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
   lessons       Lesson[]
@@ -102,15 +97,13 @@ model Subject {
 }
 
 model Lesson {
-  id        Int      @id @default(autoincrement())
-  name      String
-  day       Day
-  startTime DateTime
-  endTime   DateTime
-
-  fileUrl  String?
-  fileName String?
-
+  id          Int          @id @default(autoincrement())
+  name        String
+  day         Day
+  startTime   DateTime
+  endTime     DateTime
+  fileUrl     String?
+  fileName    String?
   subjectId   Int
   subject     Subject      @relation(fields: [subjectId], references: [id])
   classId     Int
@@ -127,10 +120,9 @@ model Exam {
   title     String
   startTime DateTime
   endTime   DateTime
-
-  lessonId Int
-  lesson   Lesson   @relation(fields: [lessonId], references: [id])
-  results  Result[]
+  lessonId  Int
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  results   Result[]
 }
 
 model Assignment {
@@ -138,33 +130,30 @@ model Assignment {
   title     String
   startDate DateTime
   dueDate   DateTime
-
-  lessonId Int
-  lesson   Lesson   @relation(fields: [lessonId], references: [id])
-  results  Result[]
+  lessonId  Int
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  results   Result[]
 }
 
 model Result {
-  id    Int @id @default(autoincrement())
-  score Int
-
-  examId       Int?
+  id           Int         @id @default(autoincrement())
+  score        Int
+  examId       Int
   exam         Exam?       @relation(fields: [examId], references: [id])
-  assignmentId Int?
+  assignmentId Int
   assignment   Assignment? @relation(fields: [assignmentId], references: [id])
   studentId    String
   student      Student     @relation(fields: [studentId], references: [id])
 }
 
 model Attendance {
-  id      Int      @id @default(autoincrement())
-  date    DateTime
-  present Boolean
-
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  present   Boolean
   studentId String
-  student   Student @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id])
   lessonId  Int
-  lesson    Lesson  @relation(fields: [lessonId], references: [id])
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
 }
 
 model Event {
@@ -173,9 +162,8 @@ model Event {
   description String
   startTime   DateTime
   endTime     DateTime
-
-  classId Int?
-  class   Class? @relation(fields: [classId], references: [id])
+  classId     Int?
+  class       Class?   @relation(fields: [classId], references: [id])
 }
 
 model Announcement {
@@ -183,47 +171,8 @@ model Announcement {
   title       String
   description String
   date        DateTime
-
-  classId Int?
-  class   Class? @relation(fields: [classId], references: [id])
-}
-
-model Conversation {
-  id        Int                  @id @default(autoincrement())
-  createdAt DateTime             @default(now())
-  messages  Message[]
-  members   ConversationMember[]
-}
-
-model ConversationMember {
-  id             Int          @id @default(autoincrement())
-  userId         String
-  userRole       String
-  conversationId Int
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-
-  @@unique([userId, conversationId])
-}
-
-model Message {
-  id             Int          @id @default(autoincrement())
-  content        String
-  createdAt      DateTime     @default(now())
-  senderId       String
-  senderRole     String
-  conversationId Int
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-  read           Boolean      @default(false)
-}
-
-model NotificationRead {
-  id       Int      @id @default(autoincrement())
-  userId   String
-  itemId   Int
-  itemType String // 'announcement' sau 'event'
-  readAt   DateTime @default(now())
-
-  @@unique([userId, itemId, itemType])
+  classId     Int?
+  class       Class?   @relation(fields: [classId], references: [id])
 }
 
 enum UserSex {

@@ -30,15 +30,17 @@ const StudentForm = ({
     resolver: zodResolver(studentSchema),
   });
 
-  const [img, setImg] = useState<any>();
+  const [img, setImg] = useState<any>(
+    data?.img ? { secure_url: data.img } : null,
+  );
 
   const [state, formAction] = useFormState(
     type === 'create' ? createStudent : updateStudent,
     { success: false, error: false, message: '' },
   );
 
-  const onSubmit = handleSubmit((data) => {
-    formAction({ ...data, img: img?.secure_url });
+  const onSubmit = handleSubmit((formData) => {
+    formAction({ ...formData, img: img?.secure_url });
   });
 
   const router = useRouter();
@@ -58,6 +60,7 @@ const StudentForm = ({
       <h1 className="text-xl font-semibold">
         {type === 'create' ? 'Create a new student' : 'Update the student'}
       </h1>
+
       <span className="text-xs text-gray-400 font-medium">
         Authentication information
       </span>
@@ -86,26 +89,10 @@ const StudentForm = ({
           error={errors?.password}
         />
       </div>
+
       <span className="text-xs text-gray-400 font-medium">
         Personal information
       </span>
-      <CldUploadWidget
-        uploadPreset="school"
-        onSuccess={(result, { widget }) => {
-          setImg(result.info);
-          widget.close();
-        }}
-      >
-        {({ open }) => (
-          <div
-            className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-            onClick={() => open()}
-          >
-            <Image src="/upload.png" alt="" width={28} height={28} />
-            <span>Upload a photo</span>
-          </div>
-        )}
-      </CldUploadWidget>
       <div className="flex justify-between flex-wrap gap-4">
         <InputField
           label="First name"
@@ -231,6 +218,64 @@ const StudentForm = ({
               {errors.classId.message.toString()}
             </p>
           )}
+        </div>
+
+        {/* Description */}
+        <div className="flex flex-col gap-2 w-full">
+          <label className="text-xs text-gray-500">Description</label>
+          <textarea
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full resize-none"
+            rows={3}
+            placeholder="Short bio or description..."
+            defaultValue={data?.description || ''}
+            {...register('description')}
+          />
+          {errors.description?.message && (
+            <p className="text-xs text-red-400">
+              {errors.description.message.toString()}
+            </p>
+          )}
+        </div>
+
+        {/* Photo upload with crop */}
+        <div className="flex flex-col gap-2 w-full">
+          <label className="text-xs text-gray-500">Profile Photo</label>
+          <CldUploadWidget
+            uploadPreset="school"
+            options={{
+              cropping: true,
+              croppingAspectRatio: 1,
+              showSkipCropButton: false,
+              croppingShowDimensions: true,
+            }}
+            onSuccess={(result, { widget }) => {
+              setImg(result.info);
+              widget.close();
+            }}
+          >
+            {({ open }) => (
+              <div className="flex items-center gap-4">
+                <div
+                  className="flex items-center gap-2 cursor-pointer bg-gray-50 border border-gray-200 rounded-md px-3 py-2 hover:bg-gray-100 transition-colors"
+                  onClick={() => open()}
+                >
+                  <Image src="/upload.png" alt="" width={20} height={20} />
+                  <span className="text-xs text-gray-500">
+                    {img ? 'Change photo' : 'Upload a photo'}
+                  </span>
+                </div>
+                {img && (
+                  <Image
+                    src={img.secure_url}
+                    alt="Preview"
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                  />
+                )}
+              </div>
+            )}
+          </CldUploadWidget>
         </div>
       </div>
 
