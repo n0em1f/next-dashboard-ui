@@ -12,7 +12,7 @@ export const routeAccessMap: RouteAccessMap = {
   '/list/teachers(.*)': ['admin', 'teacher'],
   '/list/students(.*)': ['admin', 'teacher'],
   '/list/parents(.*)': ['admin', 'teacher'],
-  '/list/subjects(.*)': ['admin'],
+  '/list/subjects(.*)': ['admin', 'teacher', 'student'],
   '/list/classes(.*)': ['admin', 'teacher'],
   '/list/exams(.*)': ['admin', 'teacher', 'student', 'parent'],
   '/list/assignments(.*)': ['admin', 'teacher', 'student', 'parent'],
@@ -21,7 +21,7 @@ export const routeAccessMap: RouteAccessMap = {
   '/list/events(.*)': ['admin', 'teacher', 'student', 'parent'],
   '/list/announcements(.*)': ['admin', 'teacher', 'student', 'parent'],
   '/list/messages(.*)': ['admin', 'teacher', 'student', 'parent'],
-  '/list/lessons(.*)': ['admin', 'teacher'],
+  '/list/lessons(.*)': ['admin', 'teacher', 'student'],
   '/profile(.*)': ['admin', 'teacher', 'student', 'parent'],
   '/settings(.*)': ['admin', 'teacher', 'student', 'parent'],
 };
