@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { toast } from 'react-toastify';
+import { CldUploadWidget } from 'next-cloudinary';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
 const SettingsPage = () => {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
+  const role = user?.publicMetadata?.role as string;
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -22,6 +25,12 @@ const SettingsPage = () => {
     user?.emailAddresses[0]?.emailAddress || '',
   );
   const [loadingContact, setLoadingContact] = useState(false);
+
+  const [description, setDescription] = useState(
+    (user?.unsafeMetadata?.description as string) || '',
+  );
+  const [img, setImg] = useState<any>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   if (!isLoaded) return null;
 
@@ -68,10 +77,109 @@ const SettingsPage = () => {
     setLoadingContact(false);
   };
 
+  const handleSaveProfile = async () => {
+    setLoadingProfile(true);
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description,
+          img: img?.secure_url || null,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to save');
+
+      // Salvam si in unsafeMetadata ca sa apara imediat
+      await user?.update({
+        unsafeMetadata: {
+          ...user.unsafeMetadata,
+          description,
+        },
+      });
+
+      toast.success('Profile updated!');
+    } catch (err: any) {
+      toast.error('Could not save profile.');
+    }
+    setLoadingProfile(false);
+  };
+
   return (
     <div className="p-6 flex flex-col items-center">
       <div className="w-full max-w-2xl flex flex-col gap-6">
         <h1 className="text-2xl font-bold text-white">Settings</h1>
+
+        {/* Profile Photo & Description — doar teacher si student */}
+        {(role === 'teacher' || role === 'student') && (
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6">
+            <h2 className="font-bold text-gray-800 text-lg mb-4">Profile</h2>
+            <div className="flex flex-col gap-4">
+              {/* Photo upload */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs text-gray-500 font-medium">
+                  Profile Photo
+                </label>
+                <CldUploadWidget
+                  uploadPreset="school"
+                  options={{
+                    cropping: true,
+                    croppingAspectRatio: 1,
+                    showSkipCropButton: false,
+                  }}
+                  onSuccess={(result, { widget }) => {
+                    setImg(result.info);
+                    widget.close();
+                  }}
+                >
+                  {({ open }) => (
+                    <div className="flex items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => open()}
+                        className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+                      >
+                        📷 {img ? 'Change photo' : 'Upload photo'}
+                      </button>
+                      {img && (
+                        <Image
+                          src={img.secure_url}
+                          alt="Preview"
+                          width={48}
+                          height={48}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                        />
+                      )}
+                    </div>
+                  )}
+                </CldUploadWidget>
+              </div>
+
+              {/* Description */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-500 font-medium">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="p-3 rounded-lg border border-gray-200 text-sm outline-none focus:border-blue-400 transition-colors resize-none"
+                  placeholder="Short bio or description..."
+                />
+              </div>
+
+              <button
+                onClick={handleSaveProfile}
+                disabled={loadingProfile}
+                className="bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                {loadingProfile ? 'Saving...' : 'Save Profile'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Account Info */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6">
