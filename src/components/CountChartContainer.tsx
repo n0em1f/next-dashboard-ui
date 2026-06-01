@@ -42,7 +42,9 @@ const CountChartContainer = async () => {
           <div className="w-5 h-5 bg-lamaYellow rounded-full" />
           <h1 className="font-bold">{girls}</h1>
           <h2 className="text-xs text-gray-300">
-            Girls ({Math.round((girls / (boys + girls)) * 100)}%)
+            Girls (
+            {boys + girls > 0 ? Math.round((girls / (boys + girls)) * 100) : 0}
+            %)
           </h2>
         </div>
       </div>
