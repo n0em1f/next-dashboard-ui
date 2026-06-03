@@ -7,7 +7,6 @@ export type FormContainerProps = {
   table:
     | 'teacher'
     | 'student'
-    | 'parent'
     | 'subject'
     | 'class'
     | 'lesson'
@@ -16,10 +15,12 @@ export type FormContainerProps = {
     | 'result'
     | 'attendance'
     | 'event'
-    | 'announcement';
+    | 'announcement'
+    | 'publication';
   type: 'create' | 'update' | 'delete';
   data?: any;
   id?: number | string;
+  relatedData?: any;
 };
 
 const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
@@ -29,7 +30,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
     const { userId, sessionClaims } = await auth();
     const role = (
       sessionClaims?.metadata as {
-        role?: 'admin' | 'teacher' | 'student' | 'parent';
+        role?: 'admin' | 'teacher' | 'student';
       }
     )?.role;
 
@@ -66,10 +67,6 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
           include: { _count: { select: { students: true } } },
         });
         relatedData = { classes: studentClasses, grades: studentGrades };
-        break;
-
-      case 'parent':
-        relatedData = {};
         break;
 
       case 'exam':

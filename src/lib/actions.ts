@@ -762,6 +762,7 @@ export const createEvent = async (currentState: CurrentState, data: any) => {
         startTime: data.startTime,
         endTime: data.endTime,
         ...(data.classId && { classId: data.classId }),
+        img: data.img || null,
       },
     });
     return { success: true, error: false };
@@ -785,6 +786,7 @@ export const updateEvent = async (currentState: CurrentState, data: any) => {
         startTime: data.startTime,
         endTime: data.endTime,
         ...(data.classId && { classId: data.classId }),
+        img: data.img || null,
       },
     });
     return { success: true, error: false };
@@ -829,6 +831,7 @@ export const createAnnouncement = async (
         description: data.description,
         date: data.date,
         ...(data.classId && { classId: data.classId }),
+        img: data.img || null,
       },
     });
     return { success: true, error: false };
@@ -854,6 +857,7 @@ export const updateAnnouncement = async (
         description: data.description,
         date: data.date,
         ...(data.classId && { classId: data.classId }),
+        img: data.img || null,
       },
     });
     return { success: true, error: false };
@@ -887,84 +891,151 @@ export const deleteAnnouncement = async (
 
 // PARENT
 
-export const createParent = async (currentState: CurrentState, data: any) => {
-  try {
-    const client = await clerkClient();
-    const user = await client.users.createUser({
-      username: data.username,
-      password: data.password,
-      firstName: data.name,
-      lastName: data.surname,
-      publicMetadata: { role: 'parent' },
-    });
+// export const createParent = async (currentState: CurrentState, data: any) => {
+//   try {
+//     const client = await clerkClient();
+//     const user = await client.users.createUser({
+//       username: data.username,
+//       password: data.password,
+//       firstName: data.name,
+//       lastName: data.surname,
+//       publicMetadata: { role: 'parent' },
+//     });
 
-    await prisma.parent.create({
+//     await prisma.parent.create({
+//       data: {
+//         id: user.id,
+//         username: data.username,
+//         name: data.name,
+//         surname: data.surname,
+//         email: data.email,
+//         phone: data.phone,
+//         address: data.address,
+//       },
+//     });
+//     return { success: true, error: false };
+//   } catch (err: any) {
+//     console.log(err);
+//     const message =
+//       err?.errors?.[0]?.longMessage || err?.message || 'Something went wrong';
+//     return { success: false, error: true, message };
+//   }
+// };
+
+// export const updateParent = async (currentState: CurrentState, data: any) => {
+//   if (!data.id)
+//     return { success: false, error: true, message: 'ID is missing' };
+//   try {
+//     const client = await clerkClient();
+//     await client.users.updateUser(data.id, {
+//       username: data.username,
+//       ...(data.password !== '' && { password: data.password }),
+//       firstName: data.name,
+//       lastName: data.surname,
+//       publicMetadata: { role: 'parent' },
+//     });
+
+//     await prisma.parent.update({
+//       where: { id: data.id },
+//       data: {
+//         username: data.username,
+//         name: data.name,
+//         surname: data.surname,
+//         email: data.email,
+//         phone: data.phone,
+//         address: data.address,
+//       },
+//     });
+//     return { success: true, error: false };
+//   } catch (err: any) {
+//     console.log(err);
+//     const message =
+//       err?.errors?.[0]?.longMessage || err?.message || 'Something went wrong';
+//     return { success: false, error: true, message };
+//   }
+// };
+
+// export const deleteParent = async (
+//   currentState: CurrentState,
+//   data: FormData,
+// ) => {
+//   const id = data.get('id') as string;
+//   try {
+//     const client = await clerkClient();
+//     try {
+//       await client.users.deleteUser(id);
+//     } catch {}
+//     await prisma.parent.delete({ where: { id } });
+//     return { success: true, error: false };
+//   } catch (err: any) {
+//     console.log(err);
+//     return {
+//       success: false,
+//       error: true,
+//       message: err?.message || 'Something went wrong',
+//     };
+//   }
+// };
+
+// PUBLICATION
+
+export const createPublication = async (
+  currentState: CurrentState,
+  data: any,
+) => {
+  try {
+    await prisma.publication.create({
       data: {
-        id: user.id,
-        username: data.username,
-        name: data.name,
-        surname: data.surname,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
+        title: data.title,
+        type: data.type,
+        year: parseInt(data.year),
+        url: data.url || null,
+        teacherId: data.teacherId,
       },
     });
     return { success: true, error: false };
   } catch (err: any) {
-    console.log(err);
-    const message =
-      err?.errors?.[0]?.longMessage || err?.message || 'Something went wrong';
-    return { success: false, error: true, message };
+    return {
+      success: false,
+      error: true,
+      message: err?.message || 'Something went wrong',
+    };
   }
 };
 
-export const updateParent = async (currentState: CurrentState, data: any) => {
-  if (!data.id)
-    return { success: false, error: true, message: 'ID is missing' };
+export const updatePublication = async (
+  currentState: CurrentState,
+  data: any,
+) => {
   try {
-    const client = await clerkClient();
-    await client.users.updateUser(data.id, {
-      username: data.username,
-      ...(data.password !== '' && { password: data.password }),
-      firstName: data.name,
-      lastName: data.surname,
-      publicMetadata: { role: 'parent' },
-    });
-
-    await prisma.parent.update({
+    await prisma.publication.update({
       where: { id: data.id },
       data: {
-        username: data.username,
-        name: data.name,
-        surname: data.surname,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
+        title: data.title,
+        type: data.type,
+        year: parseInt(data.year),
+        url: data.url || null,
       },
     });
     return { success: true, error: false };
   } catch (err: any) {
-    console.log(err);
-    const message =
-      err?.errors?.[0]?.longMessage || err?.message || 'Something went wrong';
-    return { success: false, error: true, message };
+    return {
+      success: false,
+      error: true,
+      message: err?.message || 'Something went wrong',
+    };
   }
 };
 
-export const deleteParent = async (
+export const deletePublication = async (
   currentState: CurrentState,
   data: FormData,
 ) => {
   const id = data.get('id') as string;
   try {
-    const client = await clerkClient();
-    try {
-      await client.users.deleteUser(id);
-    } catch {}
-    await prisma.parent.delete({ where: { id } });
+    await prisma.publication.delete({ where: { id: parseInt(id) } });
     return { success: true, error: false };
   } catch (err: any) {
-    console.log(err);
     return {
       success: false,
       error: true,

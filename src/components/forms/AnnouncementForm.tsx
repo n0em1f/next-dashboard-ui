@@ -3,11 +3,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import InputField from '../InputField';
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import Image from 'next/image';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useFormState } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { createAnnouncement, updateAnnouncement } from '@/lib/actions';
+import { CldUploadWidget } from 'next-cloudinary';
 
 const schema = z.object({
   id: z.coerce.number().optional(),
@@ -15,6 +17,7 @@ const schema = z.object({
   description: z.string().min(1, { message: 'Description is required!' }),
   date: z.coerce.date({ message: 'Date is required!' }),
   classId: z.coerce.number().optional(),
+  img: z.string().optional(),
 });
 
 type Inputs = z.infer<typeof schema>;
@@ -38,13 +41,17 @@ const AnnouncementForm = ({
     resolver: zodResolver(schema),
   });
 
+  const [img, setImg] = useState<any>(
+    data?.img ? { secure_url: data.img } : null,
+  );
+
   const [state, formAction] = useFormState(
     type === 'create' ? createAnnouncement : updateAnnouncement,
     { success: false, error: false, message: '' },
   );
 
-  const onSubmit = handleSubmit((data) => {
-    formAction(data);
+  const onSubmit = handleSubmit((formData) => {
+    formAction({ ...formData, img: img?.secure_url });
   });
 
   const router = useRouter();
@@ -117,13 +124,44 @@ const AnnouncementForm = ({
                 </option>
               ))}
             </select>
-            {errors.classId?.message && (
-              <p className="text-xs text-red-400">
-                {errors.classId.message.toString()}
-              </p>
-            )}
           </div>
         )}
+
+        <div className="flex flex-col gap-2 w-full">
+          <label className="text-xs text-gray-500">
+            Cover Image (optional)
+          </label>
+          <CldUploadWidget
+            uploadPreset="school"
+            onSuccess={(result, { widget }) => {
+              setImg(result.info);
+              widget.close();
+            }}
+          >
+            {({ open }) => (
+              <div className="flex items-center gap-4">
+                <div
+                  className="flex items-center gap-2 cursor-pointer bg-gray-50 border border-gray-200 rounded-md px-3 py-2 hover:bg-gray-100 transition-colors"
+                  onClick={() => open()}
+                >
+                  <Image src="/upload.png" alt="" width={20} height={20} />
+                  <span className="text-xs text-gray-500">
+                    {img ? 'Change image' : 'Upload image'}
+                  </span>
+                </div>
+                {img && (
+                  <Image
+                    src={img.secure_url}
+                    alt="Preview"
+                    width={80}
+                    height={48}
+                    className="h-12 w-20 object-cover rounded-md border border-gray-200"
+                  />
+                )}
+              </div>
+            )}
+          </CldUploadWidget>
+        </div>
       </div>
 
       {state.error && (

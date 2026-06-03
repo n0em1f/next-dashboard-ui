@@ -13,24 +13,18 @@ const menuItems = [
         icon: '/home.png',
         label: 'Home',
         href: '/',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
       {
         icon: '/teacher.png',
         label: 'Teachers',
         href: '/list/teachers',
-        visible: ['admin', 'teacher'],
+        visible: ['admin', 'teacher', 'student'],
       },
       {
         icon: '/student.png',
         label: 'Students',
         href: '/list/students',
-        visible: ['admin', 'teacher'],
-      },
-      {
-        icon: '/parent.png',
-        label: 'Parents',
-        href: '/list/parents',
         visible: ['admin', 'teacher'],
       },
       {
@@ -55,43 +49,43 @@ const menuItems = [
         icon: '/exam.png',
         label: 'Exams',
         href: '/list/exams',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
       {
         icon: '/assignment.png',
         label: 'Assignments',
         href: '/list/assignments',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
       {
         icon: '/result.png',
         label: 'Results',
         href: '/list/results',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
       {
         icon: '/attendance.png',
         label: 'Attendance',
         href: '/list/attendance',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
       {
         icon: '/calendar.png',
         label: 'Events',
         href: '/list/events',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
       {
         icon: '/message.png',
         label: 'Messages',
         href: '/list/messages',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
       {
         icon: '/announcement.png',
         label: 'Announcements',
         href: '/list/announcements',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
     ],
   },
@@ -102,13 +96,13 @@ const menuItems = [
         icon: '/profile.png',
         label: 'Profile',
         href: '/profile',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
       {
         icon: '/setting.png',
         label: 'Settings',
         href: '/settings',
-        visible: ['admin', 'teacher', 'student', 'parent'],
+        visible: ['admin', 'teacher', 'student'],
       },
     ],
   },
@@ -147,7 +141,6 @@ const Menu = async () => {
           })}
         </div>
       ))}
-      {/* Logout separat */}
       <div className="flex flex-col gap-2 mt-2">
         <LogoutButton />
       </div>

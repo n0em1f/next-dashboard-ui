@@ -38,22 +38,23 @@ model Student {
 }
 
 model Teacher {
-  id          String    @id
-  username    String    @unique
-  name        String
-  surname     String
-  email       String?   @unique
-  phone       String?   @unique
-  address     String
-  img         String?
-  description String?
-  bloodType   String
-  sex         UserSex
-  createdAt   DateTime  @default(now())
-  subjects    Subject[]
-  lessons     Lesson[]
-  classes     Class[]
-  birthday    DateTime
+  id           String        @id
+  username     String        @unique
+  name         String
+  surname      String
+  email        String?       @unique
+  phone        String?       @unique
+  address      String
+  img          String?
+  description  String?
+  bloodType    String
+  sex          UserSex
+  createdAt    DateTime      @default(now())
+  subjects     Subject[]
+  lessons      Lesson[]
+  classes      Class[]
+  birthday     DateTime
+  publications Publication[]
 }
 
 model Parent {
@@ -162,6 +163,7 @@ model Event {
   description String
   startTime   DateTime
   endTime     DateTime
+  img         String?
   classId     Int?
   class       Class?   @relation(fields: [classId], references: [id])
 }
@@ -171,6 +173,7 @@ model Announcement {
   title       String
   description String
   date        DateTime
+  img         String?
   classId     Int?
   class       Class?   @relation(fields: [classId], references: [id])
 }
@@ -204,6 +207,16 @@ model NotificationRead {
   userId   String
   itemId   Int
   itemType String
+}
+
+model Publication {
+  id        Int     @id @default(autoincrement())
+  title     String
+  type      String // ex: "Book", "Article", "Research Paper"
+  year      Int
+  url       String?
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
 }
 
 enum UserSex {

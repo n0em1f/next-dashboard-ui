@@ -7,6 +7,7 @@ import prisma from '@/lib/prisma';
 import { ITEM_PER_PAGE } from '@/lib/settings';
 import { auth } from '@clerk/nextjs/server';
 import { Class, Event, Prisma } from '@prisma/client';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,14 @@ const EventListPage = async ({
       key={item.id}
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
-      <td className="flex items-center gap-4 p-4">{item.title}</td>
+      <td className="flex items-center gap-4 p-4">
+        <Link
+          href={`/list/events/${item.id}`}
+          className="font-medium hover:text-blue-600 hover:underline"
+        >
+          {item.title}
+        </Link>
+      </td>
       <td>{item.class?.name || '-'}</td>
       <td className="hidden md:table-cell">
         {new Intl.DateTimeFormat('en-US').format(item.startTime)}
@@ -116,7 +124,7 @@ const EventListPage = async ({
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Events</h1>
+        <h1 className="hidden md:block text-lg font-semibold">Events</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">

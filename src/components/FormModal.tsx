@@ -12,7 +12,7 @@ import {
   deleteAttendance,
   deleteEvent,
   deleteAnnouncement,
-  deleteParent,
+  deletePublication,
 } from '@/lib/actions';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -27,16 +27,15 @@ const deleteActionMap = {
   teacher: deleteTeacher,
   student: deleteStudent,
   exam: deleteExam,
-  parent: deleteParent,
   lesson: deleteLesson,
   assignment: deleteAssignment,
   result: deleteResult,
   attendance: deleteAttendance,
   event: deleteEvent,
   announcement: deleteAnnouncement,
+  publication: deletePublication,
 };
 
-// LAZY LOADING
 const TeacherForm = dynamic(() => import('./forms/TeacherForm'), {
   loading: () => <h1>Loading...</h1>,
 });
@@ -47,9 +46,6 @@ const SubjectForm = dynamic(() => import('./forms/SubjectForm'), {
   loading: () => <h1>Loading...</h1>,
 });
 const ClassForm = dynamic(() => import('./forms/ClassForm'), {
-  loading: () => <h1>Loading...</h1>,
-});
-const ParentForm = dynamic(() => import('./forms/ParentForm'), {
   loading: () => <h1>Loading...</h1>,
 });
 const LessonForm = dynamic(() => import('./forms/LessonForm'), {
@@ -71,6 +67,9 @@ const EventForm = dynamic(() => import('./forms/EventForm'), {
   loading: () => <h1>Loading...</h1>,
 });
 const AnnouncementForm = dynamic(() => import('./forms/AnnouncementForm'), {
+  loading: () => <h1>Loading...</h1>,
+});
+const PublicationForm = dynamic(() => import('./forms/PublicationForm'), {
   loading: () => <h1>Loading...</h1>,
 });
 
@@ -97,9 +96,6 @@ const forms: {
       setOpen={setOpen}
       relatedData={relatedData}
     />
-  ),
-  parent: (setOpen, type, data) => (
-    <ParentForm type={type} data={data} setOpen={setOpen} />
   ),
   subject: (setOpen, type, data, relatedData) => (
     <SubjectForm
@@ -173,6 +169,14 @@ const forms: {
       relatedData={relatedData}
     />
   ),
+  publication: (setOpen, type, data, relatedData) => (
+    <PublicationForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
 };
 
 const FormModal = ({
@@ -191,7 +195,6 @@ const FormModal = ({
         : 'bg-lamaPurple';
 
   const [open, setOpen] = useState(false);
-
   const router = useRouter();
 
   const handleDelete = () => {
@@ -264,7 +267,7 @@ const FormModal = ({
       </button>
       {open && (
         <div className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%]">
+          <div className="bg-white p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%] max-h-[90vh] overflow-y-auto">
             <Form />
             <div
               className="absolute top-4 right-4 cursor-pointer"

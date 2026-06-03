@@ -5,6 +5,10 @@ const nextConfig = {
       { hostname: 'images.pexels.com' },
       { hostname: 'images.unsplash.com' },
       { hostname: 'img.clerk.com' },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
     ],
   },
   typescript: {
