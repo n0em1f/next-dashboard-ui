@@ -43,14 +43,14 @@ const MessagesPage = async ({
   const students = await prisma.student.findMany({
     select: { id: true, name: true, surname: true },
   });
-  const parents = await prisma.parent.findMany({
-    select: { id: true, name: true, surname: true },
-  });
+  // const parents = await prisma.parent.findMany({
+  //   select: { id: true, name: true, surname: true },
+  // });
 
   const allUsers = [
     ...teachers.map((t) => ({ ...t, role: 'teacher' })),
     ...students.map((s) => ({ ...s, role: 'student' })),
-    ...parents.map((p) => ({ ...p, role: 'parent' })),
+    //...parents.map((p) => ({ ...p, role: 'parent' })),
   ].filter((u) => u.id !== userId);
 
   const activeConversationId = searchParams.conversationId

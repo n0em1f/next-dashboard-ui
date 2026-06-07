@@ -17,7 +17,7 @@ const ClassListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
-  const { sessionClaims } = await auth();
+  const { sessionClaims, userId } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
   const columns = [
@@ -66,6 +66,17 @@ const ClassListPage = async ({
   const p = page ? parseInt(page) : 1;
   const query: Prisma.ClassWhereInput = {};
 
+  // Filtrare după rol
+  if (role === 'teacher') {
+    query.lessons = { some: { teacherId: userId! } };
+  } else if (role === 'student') {
+    const student = await prisma.student.findUnique({
+      where: { id: userId! },
+      select: { classId: true },
+    });
+    if (student) query.id = student.classId;
+  }
+
   if (queryParams.search)
     query.name = { contains: queryParams.search, mode: 'insensitive' };
   if (gradeId) query.gradeId = parseInt(gradeId);
@@ -96,30 +107,38 @@ const ClassListPage = async ({
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">Classes</h1>
+        <h1 className="hidden md:block text-lg font-semibold">
+          {role === 'student'
+            ? 'My Class'
+            : role === 'teacher'
+              ? 'My Classes'
+              : 'All Classes'}
+        </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <FilterSortButtons
-              filterFields={[
-                {
-                  label: 'Grade',
-                  param: 'gradeId',
-                  options: grades.map((g) => ({
-                    label: `Grade ${g.level}`,
-                    value: g.id.toString(),
-                  })),
-                },
-                {
-                  label: 'Supervisor',
-                  param: 'supervisorId',
-                  options: teachers.map((t) => ({
-                    label: `${t.name} ${t.surname}`,
-                    value: t.id,
-                  })),
-                },
-              ]}
-            />
+            {role === 'admin' && (
+              <FilterSortButtons
+                filterFields={[
+                  {
+                    label: 'Grade',
+                    param: 'gradeId',
+                    options: grades.map((g) => ({
+                      label: `Grade ${g.level}`,
+                      value: g.id.toString(),
+                    })),
+                  },
+                  {
+                    label: 'Supervisor',
+                    param: 'supervisorId',
+                    options: teachers.map((t) => ({
+                      label: `${t.name} ${t.surname}`,
+                      value: t.id,
+                    })),
+                  },
+                ]}
+              />
+            )}
             {role === 'admin' && <FormContainer table="class" type="create" />}
           </div>
         </div>

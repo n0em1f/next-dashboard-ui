@@ -32,9 +32,9 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
 
-  if (file.size > 10 * 1024 * 1024)
+  if (file.size > 50 * 1024 * 1024)
     return NextResponse.json(
-      { error: 'File too large (max 10MB)' },
+      { error: 'File too large (max 50MB)' },
       { status: 400 },
     );
 
@@ -43,15 +43,19 @@ export async function POST(req: NextRequest) {
   const base64 = buffer.toString('base64');
   const dataUri = `data:application/pdf;base64,${base64}`;
 
-  const result = await cloudinary.uploader.upload(dataUri, {
-    resource_type: 'raw',
-    folder: 'academos/lessons',
-    format: 'pdf',
-    public_id: `lesson_${Date.now()}`,
-  });
-
-  return NextResponse.json({
-    url: result.secure_url,
-    fileName: file.name,
-  });
+  try {
+    const result = await cloudinary.uploader.upload(dataUri, {
+      resource_type: 'raw',
+      folder: 'academos/lessons',
+      format: 'pdf',
+      public_id: `lesson_${Date.now()}`,
+    });
+    return NextResponse.json({ url: result.secure_url, fileName: file.name });
+  } catch (err: any) {
+    console.error('Cloudinary error:', err);
+    return NextResponse.json(
+      { error: err.message || 'Upload failed' },
+      { status: 500 },
+    );
+  }
 }

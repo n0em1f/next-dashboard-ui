@@ -801,76 +801,76 @@ YOUR CAPABILITIES FOR ADMINS:
 GUIDELINES: Be professional, data-driven, respond in the same language the admin uses.`;
   }
 
-  // ===================== PARENT =====================
-  else if (role === 'parent') {
-    const children = await prisma.student.findMany({
-      where: { parentId: userId },
-      include: {
-        class: { select: { name: true } },
-        grade: { select: { level: true } },
-        results: {
-          include: {
-            exam: {
-              include: {
-                lesson: { select: { subject: { select: { name: true } } } },
-              },
-            },
-            assignment: {
-              include: {
-                lesson: { select: { subject: { select: { name: true } } } },
-              },
-            },
-          },
-          orderBy: { id: 'desc' },
-          take: 20,
-        },
-        attendance: { select: { present: true } },
-      },
-    });
+  //   // ===================== PARENT =====================
+  //   else if (role === 'parent') {
+  //     const children = await prisma.student.findMany({
+  //       where: { parentId: userId },
+  //       include: {
+  //         class: { select: { name: true } },
+  //         grade: { select: { level: true } },
+  //         results: {
+  //           include: {
+  //             exam: {
+  //               include: {
+  //                 lesson: { select: { subject: { select: { name: true } } } },
+  //               },
+  //             },
+  //             assignment: {
+  //               include: {
+  //                 lesson: { select: { subject: { select: { name: true } } } },
+  //               },
+  //             },
+  //           },
+  //           orderBy: { id: 'desc' },
+  //           take: 20,
+  //         },
+  //         attendance: { select: { present: true } },
+  //       },
+  //     });
 
-    contextData = `
-CHILDREN:
-${children
-  .map((c) => {
-    const scores = c.results.map((r) => r.score);
-    const avg =
-      scores.length > 0
-        ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
-        : null;
-    const present = c.attendance.filter((a) => a.present).length;
-    const total = c.attendance.length;
-    const pct = total > 0 ? Math.round((present / total) * 100) : null;
-    const results = c.results
-      .map((r) => {
-        const subject =
-          r.exam?.lesson?.subject?.name ||
-          r.assignment?.lesson?.subject?.name ||
-          'Unknown';
-        return `  • ${subject}: ${r.score} pts`;
-      })
-      .join('\n');
-    return `- ${c.name} ${c.surname} (Class ${c.class?.name}, Grade ${c.grade?.level}):
-  Average: ${avg !== null ? avg : 'N/A'} pts, Attendance: ${pct !== null ? pct + '%' : 'N/A'}
-  Results:\n${results || '  None yet'}`;
-  })
-  .join('\n\n')}`;
+  //     contextData = `
+  // CHILDREN:
+  // ${children
+  //   .map((c) => {
+  //     const scores = c.results.map((r) => r.score);
+  //     const avg =
+  //       scores.length > 0
+  //         ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+  //         : null;
+  //     const present = c.attendance.filter((a) => a.present).length;
+  //     const total = c.attendance.length;
+  //     const pct = total > 0 ? Math.round((present / total) * 100) : null;
+  //     const results = c.results
+  //       .map((r) => {
+  //         const subject =
+  //           r.exam?.lesson?.subject?.name ||
+  //           r.assignment?.lesson?.subject?.name ||
+  //           'Unknown';
+  //         return `  • ${subject}: ${r.score} pts`;
+  //       })
+  //       .join('\n');
+  //     return `- ${c.name} ${c.surname} (Class ${c.class?.name}, Grade ${c.grade?.level}):
+  //   Average: ${avg !== null ? avg : 'N/A'} pts, Attendance: ${pct !== null ? pct + '%' : 'N/A'}
+  //   Results:\n${results || '  None yet'}`;
+  //   })
+  //   .join('\n\n')}`;
 
-    systemPrompt = `You are an expert Academic Advisor AI for Academos. You help parents support their children.
+  //     systemPrompt = `You are an expert Academic Advisor AI for Academos. You help parents support their children.
 
-${contextData}
+  // ${contextData}
 
-Today: ${now.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+  // Today: ${now.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 
-YOUR CAPABILITIES FOR PARENTS:
-1. Progress monitoring — explain grades and attendance in simple terms
-2. Support strategies — suggest how to help at home
-3. Concern identification — flag subjects needing extra help
-4. Study environment tips — advice on good study conditions at home
-5. Motivation strategies — age-appropriate ways to motivate children
-6. Communication tips — how to talk to teachers about their child's progress
+  // YOUR CAPABILITIES FOR PARENTS:
+  // 1. Progress monitoring — explain grades and attendance in simple terms
+  // 2. Support strategies — suggest how to help at home
+  // 3. Concern identification — flag subjects needing extra help
+  // 4. Study environment tips — advice on good study conditions at home
+  // 5. Motivation strategies — age-appropriate ways to motivate children
+  // 6. Communication tips — how to talk to teachers about their child's progress
 
-GUIDELINES: Be warm, supportive, explain academic terms simply, respond in the same language the parent uses.`;
-  }
+  // GUIDELINES: Be warm, supportive, explain academic terms simply, respond in the same language the parent uses.`;
+  //   }
 
   // ========================================================
   // FORMATRE ȘI VALIDARE MESAJE PENTRU GOOGLE GEMINI

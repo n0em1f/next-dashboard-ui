@@ -290,7 +290,6 @@ export const createStudent = async (
         birthday: data.birthday,
         gradeId: data.gradeId,
         classId: data.classId,
-        parentId: data.parentId,
         description: data.description,
       },
     });
@@ -335,7 +334,6 @@ export const updateStudent = async (
         birthday: data.birthday,
         gradeId: data.gradeId,
         classId: data.classId,
-        parentId: data.parentId,
         description: data.description,
       },
     });
@@ -479,21 +477,30 @@ export const deleteExam = async (
 
 // LESSON
 
-export const createLesson = async (currentState: CurrentState, data: any) => {
+export const createLesson = async (
+  currentState: CurrentState,
+  data: FormData,
+) => {
   try {
+    const isRecurring = data.get('isRecurring') === 'true';
+
     await prisma.lesson.create({
       data: {
-        name: data.name,
-        day: data.day,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        subjectId: data.subjectId,
-        classId: data.classId,
-        teacherId: data.teacherId,
-        ...(data.fileUrl && { fileUrl: data.fileUrl }),
-        ...(data.fileName && { fileName: data.fileName }),
+        name: data.get('name') as string,
+        day: data.get('day') as any,
+        startTime: new Date(data.get('startTime') as string),
+        endTime: new Date(data.get('endTime') as string),
+        subjectId: parseInt(data.get('subjectId') as string),
+        classId: parseInt(data.get('classId') as string),
+        teacherId: data.get('teacherId') as string,
+        isRecurring,
+        ...(data.get('fileUrl') && { fileUrl: data.get('fileUrl') as string }),
+        ...(data.get('fileName') && {
+          fileName: data.get('fileName') as string,
+        }),
       },
     });
+
     return { success: true, error: false };
   } catch (err: any) {
     console.log(err);
@@ -505,20 +512,23 @@ export const createLesson = async (currentState: CurrentState, data: any) => {
   }
 };
 
-export const updateLesson = async (currentState: CurrentState, data: any) => {
+export const updateLesson = async (
+  currentState: CurrentState,
+  data: FormData,
+) => {
   try {
     await prisma.lesson.update({
-      where: { id: data.id },
+      where: { id: parseInt(data.get('id') as string) },
       data: {
-        name: data.name,
-        day: data.day,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        subjectId: data.subjectId,
-        classId: data.classId,
-        teacherId: data.teacherId,
-        fileUrl: data.fileUrl || null,
-        fileName: data.fileName || null,
+        name: data.get('name') as string,
+        day: data.get('day') as any,
+        startTime: new Date(data.get('startTime') as string),
+        endTime: new Date(data.get('endTime') as string),
+        subjectId: parseInt(data.get('subjectId') as string),
+        classId: parseInt(data.get('classId') as string),
+        teacherId: data.get('teacherId') as string,
+        fileUrl: (data.get('fileUrl') as string) || null,
+        fileName: (data.get('fileName') as string) || null,
       },
     });
     return { success: true, error: false };

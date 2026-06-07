@@ -1,4 +1,4 @@
-import FormModal from '@/components/FormModal';
+import FormContainer from '@/components/FormContainer';
 import Pagination from '@/components/Pagination';
 import Table from '@/components/Table';
 import TableSearch from '@/components/TableSearch';
@@ -26,7 +26,9 @@ const AnnouncementListPage = async ({
     { header: 'Title', accessor: 'title' },
     { header: 'Class', accessor: 'class' },
     { header: 'Date', accessor: 'date', className: 'hidden md:table-cell' },
-    ...(role === 'admin' ? [{ header: 'Actions', accessor: 'action' }] : []),
+    ...(role === 'admin' || role === 'teacher'
+      ? [{ header: 'Actions', accessor: 'action' }]
+      : []),
   ];
 
   const renderRow = (item: AnnouncementList) => (
@@ -50,8 +52,14 @@ const AnnouncementListPage = async ({
         <div className="flex items-center gap-2">
           {role === 'admin' && (
             <>
-              <FormModal table="announcement" type="update" data={item} />
-              <FormModal table="announcement" type="delete" id={item.id} />
+              <FormContainer table="announcement" type="update" data={item} />
+              <FormContainer table="announcement" type="delete" id={item.id} />
+            </>
+          )}
+          {role === 'teacher' && (
+            <>
+              <FormContainer table="announcement" type="update" data={item} />
+              <FormContainer table="announcement" type="delete" id={item.id} />
             </>
           )}
         </div>
@@ -69,7 +77,6 @@ const AnnouncementListPage = async ({
   const roleConditions = {
     teacher: { lessons: { some: { teacherId: currentUserId! } } },
     student: { students: { some: { id: currentUserId! } } },
-    parent: { students: { some: { id: currentUserId! } } },
   };
 
   if (classId) {
@@ -116,8 +123,8 @@ const AnnouncementListPage = async ({
                 },
               ]}
             />
-            {role === 'admin' && (
-              <FormModal table="announcement" type="create" />
+            {(role === 'admin' || role === 'teacher') && (
+              <FormContainer table="announcement" type="create" />
             )}
           </div>
         </div>

@@ -1,4 +1,4 @@
-import FormModal from '@/components/FormModal';
+import FormContainer from '@/components/FormContainer';
 import Pagination from '@/components/Pagination';
 import Table from '@/components/Table';
 import TableSearch from '@/components/TableSearch';
@@ -60,8 +60,8 @@ const AssignmentListPage = async ({
         <div className="flex items-center gap-2">
           {(role === 'admin' || role === 'teacher') && (
             <>
-              <FormModal table="assignment" type="update" data={item} />
-              <FormModal table="assignment" type="delete" id={item.id} />
+              <FormContainer table="assignment" type="update" data={item} />
+              <FormContainer table="assignment" type="delete" id={item.id} />
             </>
           )}
         </div>
@@ -87,9 +87,6 @@ const AssignmentListPage = async ({
       break;
     case 'student':
       query.lesson.class = { students: { some: { id: currentUserId! } } };
-      break;
-    case 'parent':
-      query.lesson.class = { students: { some: { parentId: currentUserId! } } };
       break;
   }
 
@@ -126,9 +123,7 @@ const AssignmentListPage = async ({
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">
-          All Assignments
-        </h1>
+        <h1 className="hidden md:block text-lg font-semibold">Assignments</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
@@ -153,7 +148,7 @@ const AssignmentListPage = async ({
               ]}
             />
             {(role === 'admin' || role === 'teacher') && (
-              <FormModal table="assignment" type="create" />
+              <FormContainer table="assignment" type="create" />
             )}
           </div>
         </div>

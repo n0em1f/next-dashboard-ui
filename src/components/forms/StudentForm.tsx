@@ -186,7 +186,7 @@ const StudentForm = ({
               />
             </Field>
           </div>
-          <div className="flex-1 min-w-[150px]">
+          {/* <div className="flex-1 min-w-[150px]">
             <Field label="Parent Id" error={errors.parentId}>
               <Input
                 register={register}
@@ -194,7 +194,7 @@ const StudentForm = ({
                 defaultValue={data?.parentId}
               />
             </Field>
-          </div>
+          </div> */}
           {data && (
             <input type="hidden" {...register('id')} defaultValue={data?.id} />
           )}

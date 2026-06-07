@@ -3,8 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import InputField from '../InputField';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import { useFormState } from 'react-dom';
+import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { createLesson, updateLesson } from '@/lib/actions';
@@ -15,8 +14,8 @@ const schema = z.object({
   day: z.enum(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'], {
     message: 'Day is required!',
   }),
-  startTime: z.coerce.date({ message: 'Start time is required!' }),
-  endTime: z.coerce.date({ message: 'End time is required!' }),
+  startTime: z.string().min(1, { message: 'Start time is required!' }),
+  endTime: z.string().min(1, { message: 'End time is required!' }),
   subjectId: z.coerce.number({ message: 'Subject is required!' }),
   classId: z.coerce.number({ message: 'Class is required!' }),
   teacherId: z.string().min(1, { message: 'Teacher is required!' }),
@@ -25,6 +24,15 @@ const schema = z.object({
 });
 
 type Inputs = z.infer<typeof schema>;
+
+const toDatetimeLocal = (iso?: string) => {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toISOString().slice(0, 16);
+  } catch {
+    return '';
+  }
+};
 
 const LessonForm = ({
   type,
@@ -37,6 +45,8 @@ const LessonForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
 }) => {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -46,18 +56,21 @@ const LessonForm = ({
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
     defaultValues: {
+      subjectId: data?.subjectId ?? relatedData?.subjects?.[0]?.id,
+      classId: data?.classId ?? relatedData?.classes?.[0]?.id,
+      teacherId: data?.teacherId ?? relatedData?.teachers?.[0]?.id ?? '',
       fileUrl: data?.fileUrl || '',
       fileName: data?.fileName || '',
+      startTime: toDatetimeLocal(data?.startTime),
+      endTime: toDatetimeLocal(data?.endTime),
     },
   });
 
-  const [state, formAction] = useFormState(
-    type === 'create' ? createLesson : updateLesson,
-    { success: false, error: false, message: '' },
-  );
-
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringUntil, setRecurringUntil] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fileUrl = watch('fileUrl');
@@ -71,8 +84,8 @@ const LessonForm = ({
       setUploadError('Only PDF files are allowed.');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError('File is too large (max 10MB).');
+    if (file.size > 50 * 1024 * 1024) {
+      setUploadError('File is too large (max 50MB).');
       return;
     }
 
@@ -111,19 +124,50 @@ const LessonForm = ({
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const onSubmit = handleSubmit((data) => {
-    formAction(data);
-  });
-
-  const router = useRouter();
-
-  useEffect(() => {
-    if (state.success) {
-      toast(`Lesson has been ${type === 'create' ? 'created' : 'updated'}!`);
-      setOpen(false);
-      router.refresh();
+  const onSubmit = handleSubmit(async (formData) => {
+    if (isRecurring && !recurringUntil) {
+      toast.error('Please select an end date for recurring lessons.');
+      return;
     }
-  }, [state, router, type, setOpen]);
+
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      fd.append('name', formData.name);
+      fd.append('day', formData.day);
+      fd.append('startTime', new Date(formData.startTime).toISOString());
+      fd.append('endTime', new Date(formData.endTime).toISOString());
+      fd.append('subjectId', String(formData.subjectId));
+      fd.append('classId', String(formData.classId));
+      fd.append('teacherId', formData.teacherId);
+      if (formData.fileUrl) fd.append('fileUrl', formData.fileUrl);
+      if (formData.fileName) fd.append('fileName', formData.fileName);
+      if (formData.id) fd.append('id', String(formData.id));
+
+      if (isRecurring && type === 'create') {
+        fd.append('isRecurring', 'true');
+        fd.append('recurringUntil', new Date(recurringUntil).toISOString());
+      }
+
+      const action = type === 'create' ? createLesson : updateLesson;
+      const result = await action(
+        { success: false, error: false, message: '' },
+        fd,
+      );
+
+      if (result.success) {
+        toast(`Lesson has been ${type === 'create' ? 'created' : 'updated'}!`);
+        setOpen(false);
+        router.refresh();
+      } else {
+        toast.error(result.message || 'Something went wrong!');
+      }
+    } catch (err) {
+      toast.error('Something went wrong!');
+    } finally {
+      setSubmitting(false);
+    }
+  });
 
   const { subjects, classes, teachers } = relatedData ?? {};
 
@@ -143,7 +187,7 @@ const LessonForm = ({
         <InputField
           label="Start Time"
           name="startTime"
-          defaultValue={data?.startTime}
+          defaultValue={toDatetimeLocal(data?.startTime)}
           register={register}
           error={errors?.startTime}
           type="datetime-local"
@@ -151,7 +195,7 @@ const LessonForm = ({
         <InputField
           label="End Time"
           name="endTime"
-          defaultValue={data?.endTime}
+          defaultValue={toDatetimeLocal(data?.endTime)}
           register={register}
           error={errors?.endTime}
           type="datetime-local"
@@ -255,6 +299,47 @@ const LessonForm = ({
           </div>
         )}
 
+        {/* Repeat weekly — doar la create */}
+        {type === 'create' && (
+          <div className="flex flex-col gap-3 w-full border border-gray-200 rounded-md p-4 bg-gray-50">
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <div
+                onClick={() => setIsRecurring(!isRecurring)}
+                className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${
+                  isRecurring ? 'bg-blue-500' : 'bg-gray-300'
+                }`}
+              >
+                <div
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                    isRecurring ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </div>
+              <span className="text-sm font-medium text-gray-700">
+                Repeat weekly
+              </span>
+            </label>
+
+            {isRecurring && (
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-500">Repeat until</label>
+                <input
+                  type="date"
+                  value={recurringUntil}
+                  onChange={(e) => setRecurringUntil(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full md:w-1/2 outline-none focus:ring-blue-400"
+                />
+                {isRecurring && !recurringUntil && (
+                  <p className="text-xs text-orange-400">
+                    Please select an end date.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* PDF Upload */}
         <div className="flex flex-col gap-2 w-full">
           <label className="text-xs text-gray-500">Lesson PDF (optional)</label>
@@ -266,7 +351,7 @@ const LessonForm = ({
                 {fileName || 'lesson.pdf'}
               </span>
               <a
-                href={fileUrl}
+                href={`https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-blue-600 hover:underline"
@@ -296,7 +381,7 @@ const LessonForm = ({
                   <span className="text-2xl">📁</span>
                   <p className="text-sm text-gray-500">
                     Click to upload PDF{' '}
-                    <span className="text-gray-400">(max 10MB)</span>
+                    <span className="text-gray-400">(max 50MB)</span>
                   </p>
                 </div>
               )}
@@ -312,7 +397,6 @@ const LessonForm = ({
             disabled={uploading}
           />
 
-          {/* Hidden fields to submit fileUrl and fileName */}
           <input type="hidden" {...register('fileUrl')} />
           <input type="hidden" {...register('fileName')} />
 
@@ -320,13 +404,19 @@ const LessonForm = ({
         </div>
       </div>
 
-      {state.error && (
-        <span className="text-red-500">
-          {state.message || 'Something went wrong!'}
-        </span>
-      )}
-      <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === 'create' ? 'Create' : 'Update'}
+      <button
+        disabled={submitting || uploading}
+        className="bg-blue-400 text-white p-2 rounded-md disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {submitting
+          ? type === 'create'
+            ? isRecurring
+              ? 'Creating lessons...'
+              : 'Creating...'
+            : 'Updating...'
+          : type === 'create'
+            ? 'Create'
+            : 'Update'}
       </button>
     </form>
   );

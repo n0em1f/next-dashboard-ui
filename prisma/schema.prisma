@@ -26,8 +26,8 @@ model Student {
   bloodType   String
   sex         UserSex
   createdAt   DateTime     @default(now())
-  parentId    String
-  parent      Parent       @relation(fields: [parentId], references: [id])
+  // parentId    String
+  //parent      Parent       @relation(fields: [parentId], references: [id])
   classId     Int
   class       Class        @relation(fields: [classId], references: [id])
   gradeId     Int
@@ -57,17 +57,17 @@ model Teacher {
   publications Publication[]
 }
 
-model Parent {
-  id        String    @id
-  username  String    @unique
-  name      String
-  surname   String
-  email     String?   @unique
-  phone     String    @unique
-  address   String
-  createdAt DateTime  @default(now())
-  students  Student[]
-}
+// model Parent {
+//   id        String    @id
+//   username  String    @unique
+//   name      String
+//   surname   String
+//   email     String?   @unique
+//   phone     String    @unique
+//   address   String
+//   createdAt DateTime  @default(now())
+//   students  Student[]
+// }
 
 model Grade {
   id       Int       @id @default(autoincrement())
@@ -105,6 +105,7 @@ model Lesson {
   endTime     DateTime
   fileUrl     String?
   fileName    String?
+  isRecurring Boolean      @default(false)
   subjectId   Int
   subject     Subject      @relation(fields: [subjectId], references: [id])
   classId     Int
@@ -188,6 +189,7 @@ model Conversation {
 model ConversationMember {
   id             Int          @id @default(autoincrement())
   userId         String
+  userRole       String       @default("")
   conversationId Int
   conversation   Conversation @relation(fields: [conversationId], references: [id])
 }
@@ -196,6 +198,7 @@ model Message {
   id             Int          @id @default(autoincrement())
   content        String
   senderId       String
+  senderRole     String       @default("")
   read           Boolean      @default(false)
   createdAt      DateTime     @default(now())
   conversationId Int

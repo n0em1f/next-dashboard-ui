@@ -1,4 +1,4 @@
-import FormModal from '@/components/FormModal';
+import FormContainer from '@/components/FormContainer';
 import Pagination from '@/components/Pagination';
 import Table from '@/components/Table';
 import TableSearch from '@/components/TableSearch';
@@ -36,7 +36,9 @@ const EventListPage = async ({
       accessor: 'endTime',
       className: 'hidden md:table-cell',
     },
-    ...(role === 'admin' ? [{ header: 'Actions', accessor: 'action' }] : []),
+    ...(role === 'admin' || role === 'teacher'
+      ? [{ header: 'Actions', accessor: 'action' }]
+      : []),
   ];
 
   const renderRow = (item: EventList) => (
@@ -74,8 +76,14 @@ const EventListPage = async ({
         <div className="flex items-center gap-2">
           {role === 'admin' && (
             <>
-              <FormModal table="event" type="update" data={item} />
-              <FormModal table="event" type="delete" id={item.id} />
+              <FormContainer table="event" type="update" data={item} />
+              <FormContainer table="event" type="delete" id={item.id} />
+            </>
+          )}
+          {role === 'teacher' && (
+            <>
+              <FormContainer table="event" type="update" data={item} />
+              <FormContainer table="event" type="delete" id={item.id} />
             </>
           )}
         </div>
@@ -93,7 +101,6 @@ const EventListPage = async ({
   const roleConditions = {
     teacher: { lessons: { some: { teacherId: currentUserId! } } },
     student: { students: { some: { id: currentUserId! } } },
-    parent: { students: { some: { id: currentUserId! } } },
   };
 
   if (classId) {
@@ -140,7 +147,9 @@ const EventListPage = async ({
                 },
               ]}
             />
-            {role === 'admin' && <FormModal table="event" type="create" />}
+            {(role === 'admin' || role === 'teacher') && (
+              <FormContainer table="event" type="create" />
+            )}
           </div>
         </div>
       </div>

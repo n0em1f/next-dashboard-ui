@@ -5,6 +5,7 @@ import Link from 'next/link';
 import prisma from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 import NotificationsDropdown from './NotificationsDropdown';
+import GlobalSearch from './GlobalSearch';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,6 @@ const Navbar = async () => {
   const user = await currentUser();
   const { userId } = await auth();
 
-  // Mesaje necitite
   const unreadCount = userId
     ? await prisma.message.count({
         where: {
@@ -25,7 +25,6 @@ const Navbar = async () => {
       })
     : 0;
 
-  // Toate anunturile si evenimentele
   const announcements = await prisma.announcement.findMany({
     orderBy: { date: 'desc' },
     take: 5,
@@ -39,7 +38,6 @@ const Navbar = async () => {
     select: { id: true, title: true, description: true, startTime: true },
   });
 
-  // Ce a citit userul deja
   const readNotifications = userId
     ? await prisma.notificationRead.findMany({
         where: { userId },
@@ -68,7 +66,6 @@ const Navbar = async () => {
     announcements.filter((a) => !readAnnouncementIds.has(a.id)).length +
     events.filter((e) => !readEventIds.has(e.id)).length;
 
-  // Serializam datele
   const serializedAnnouncements = announcements.map((a) => ({
     ...a,
     date: a.date.toISOString(),
@@ -83,25 +80,11 @@ const Navbar = async () => {
 
   return (
     <div className="flex items-center justify-between p-4 relative z-50">
-      {/* SEARCH BAR */}
-      <div className="hidden md:flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-white/30 px-2 bg-white/10">
-        <Image
-          src="/search.png"
-          alt=""
-          width={14}
-          height={14}
-          className="opacity-70"
-        />
-        <input
-          type="text"
-          placeholder="Search..."
-          className="w-[200px] p-2 bg-transparent outline-none text-white placeholder-white/40 text-sm"
-        />
-      </div>
+      {/* GLOBAL SEARCH */}
+      <GlobalSearch />
 
       {/* ICONS AND USER */}
       <div className="flex items-center gap-6 justify-end w-full">
-        {/* Messages */}
         <Link href="/list/messages">
           <div className="relative bg-white/10 rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors">
             <Image
@@ -119,7 +102,6 @@ const Navbar = async () => {
           </div>
         </Link>
 
-        {/* Notifications */}
         <NotificationsDropdown
           announcements={serializedAnnouncements}
           events={serializedEvents}
