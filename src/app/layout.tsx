@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   description: 'Platforma de management academic',
   icons: {
     icon: '/logo.png',
+    shortcut: '/icon.png',
   },
 };
 

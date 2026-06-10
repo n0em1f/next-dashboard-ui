@@ -17,6 +17,20 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async headers() {
+    return [
+      {
+        source: '/favicon.ico',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
