@@ -11,8 +11,11 @@ export const fetchCache = 'force-no-store';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Lama Dev School Management Dashboard',
-  description: 'Next.js School Management System',
+  title: 'Academos',
+  description: 'Platforma de management academic',
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({
