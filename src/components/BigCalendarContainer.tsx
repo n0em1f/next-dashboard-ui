@@ -31,7 +31,7 @@ const BigCalendarContainer = async ({
   console.log('dataRes:', dataRes);
   console.log('schedule:', schedule);
   return (
-    <div className="">
+    <div className="h-[75vh] md:h-[80vh]">
       <BigCalendar data={schedule} />
     </div>
   );

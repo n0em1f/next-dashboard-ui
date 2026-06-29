@@ -163,10 +163,10 @@ const AttendanceClient = ({
               return (
                 <div
                   key={lesson.id}
-                  className="bg-white/80 backdrop-blur-sm rounded-xl p-6 flex items-center justify-between gap-4"
+                  className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                 >
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex flex-wrap items-center gap-3 mb-1">
                       <h2 className="font-semibold text-gray-800 text-lg">
                         {lesson.subject?.name}
                       </h2>
@@ -191,7 +191,7 @@ const AttendanceClient = ({
                       </p>
                     )}
                   </div>
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 self-start sm:self-auto">
                     {checkedIn ? (
                       <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-xl">
                         <span className="text-lg">✓</span>

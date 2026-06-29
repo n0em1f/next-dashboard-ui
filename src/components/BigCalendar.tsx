@@ -3,9 +3,7 @@
 import { Calendar, momentLocalizer, View, Views } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useState } from 'react';
-
-export const dynamic = 'force-dynamic';
+import { useState, useEffect } from 'react';
 
 const localizer = momentLocalizer(moment);
 
@@ -15,6 +13,12 @@ const BigCalendar = ({
   data: { title: string; start: Date; end: Date }[];
 }) => {
   const [view, setView] = useState<View>(Views.WORK_WEEK);
+
+  // Pe mobil, pornește în vederea pe zi (work week e ilizibil pe ecran îngust)
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) setView(Views.DAY);
+  }, []);
 
   const handleOnChangeView = (selectedView: View) => {
     setView(selectedView);
