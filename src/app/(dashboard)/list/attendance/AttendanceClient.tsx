@@ -226,9 +226,9 @@ const AttendanceClient = ({
 
   // ===================== TEACHER / ADMIN VIEW =====================
   return (
-    <div className="p-6 flex gap-6 h-full">
+    <div className="p-6 flex flex-col lg:flex-row gap-6 lg:h-full">
       {/* LEFT - lesson selector */}
-      <div className="w-72 flex-shrink-0">
+      <div className="w-full lg:w-72 flex-shrink-0">
         <div className="bg-white/80 backdrop-blur-sm rounded-xl overflow-hidden">
           <div className="p-4 border-b border-gray-100">
             <h2 className="font-bold text-gray-800">Lessons</h2>
@@ -244,7 +244,7 @@ const AttendanceClient = ({
                 }}
                 className={`w-full text-left p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors ${selectedLessonId === lesson.id && activeTab === 'today' ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
               >
-                <p className="font-medium text-gray-800 text-sm">
+                <p className="font-medium  text-gray-800 text-sm">
                   {lesson.subject?.name}
                 </p>
                 <p className="text-xs text-gray-500">{lesson.name}</p>
@@ -327,7 +327,7 @@ const AttendanceClient = ({
                     </span>
                   </div>
                 </div>
-                <div className="divide-y divide-gray-50">
+                <div className="divide-y divide-gray-50 overflow-y-auto max-h-[calc(100vh-280px)]">
                   {lessonStudents.length === 0 ? (
                     <div className="p-8 text-center text-gray-400">
                       No students in this class.

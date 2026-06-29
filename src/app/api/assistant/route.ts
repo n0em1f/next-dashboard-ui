@@ -872,9 +872,8 @@ GUIDELINES: Be professional, data-driven, respond in the same language the admin
   // GUIDELINES: Be warm, supportive, explain academic terms simply, respond in the same language the parent uses.`;
   //   }
 
-  // ========================================================
-  // FORMATRE ȘI VALIDARE MESAJE PENTRU GOOGLE GEMINI
-  // ========================================================
+  // FORMATARE ȘI VALIDARE MESAJE PENTRU GOOGLE GEMINI
+
   let geminiMessages = messages.map((m: { role: string; content: string }) => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],

@@ -24,7 +24,7 @@ const LoginPage = () => {
   // Asteapta sa se incarce Clerk
   if (!isLoaded) return null;
 
-  // Daca e deja autentificat, nu afisa formularul
+  // Daca e deja autentificat, nu afiseaza formularul
   if (isSignedIn) return null;
   return (
     <div className="h-screen flex items-center justify-center relative overflow-hidden">

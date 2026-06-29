@@ -71,9 +71,10 @@ const NotificationsDropdown = ({
   const handleToggle = () => {
     if (!open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      const isMobile = window.innerWidth < 640;
       setPosition({
         top: rect.bottom + window.scrollY + 8,
-        right: window.innerWidth - rect.right,
+        right: isMobile ? 8 : Math.max(8, window.innerWidth - rect.right),
       });
     }
     setOpen(!open);
@@ -121,9 +122,8 @@ const NotificationsDropdown = ({
           top: position.top,
           right: position.right,
           zIndex: 99999,
-          width: '320px',
         }}
-        className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100"
+        className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100 w-[calc(100vw-1rem)] max-w-[320px]"
       >
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
           <h3 className="font-bold text-gray-800">Notifications</h3>

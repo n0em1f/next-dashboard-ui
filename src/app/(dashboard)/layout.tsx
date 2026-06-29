@@ -13,7 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="h-screen flex relative overflow-hidden">
+    <div className="h-dvh flex relative overflow-hidden">
       {/* Global blurred background */}
 
       <div
@@ -52,7 +52,7 @@ export default function DashboardLayout({
         <div className="bg-white/10 backdrop-blur-sm border-b border-white/10 sticky top-0 z-40">
           <Navbar />
         </div>
-        <div className="flex-1 bg-white/15 backdrop-blur-sm overflow-y-auto">
+        <div className="flex-1 bg-white/15 backdrop-blur-sm overflow-y-auto pb-20 lg:pb-0">
           {children}
         </div>
       </div>

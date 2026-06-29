@@ -132,7 +132,7 @@ const Menu = async () => {
                     alt=""
                     width={20}
                     height={20}
-                    className="opacity-80"
+                    className="opacity-80 brightness-0 invert"
                   />
                   <span className="hidden lg:block">{item.label}</span>
                 </Link>
