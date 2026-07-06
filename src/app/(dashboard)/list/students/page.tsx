@@ -6,13 +6,13 @@ import FilterSortButtons from '@/components/FilterSortButtons';
 import prisma from '@/lib/prisma';
 import { ITEM_PER_PAGE } from '@/lib/settings';
 import { auth } from '@clerk/nextjs/server';
-import { Class, Prisma, Student } from '@prisma/client';
+import { Class, Grade, Prisma, Student } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
-type StudentList = Student & { class: Class };
+type StudentList = Student & { class: Class; grade: Grade };
 
 const StudentListPage = async ({
   searchParams,
@@ -29,7 +29,7 @@ const StudentListPage = async ({
       accessor: 'studentId',
       className: 'hidden md:table-cell',
     },
-    { header: 'Grade', accessor: 'grade', className: 'hidden md:table-cell' },
+    { header: 'Year', accessor: 'year', className: 'hidden md:table-cell' },
     { header: 'Phone', accessor: 'phone', className: 'hidden lg:table-cell' },
     {
       header: 'Address',
@@ -60,7 +60,7 @@ const StudentListPage = async ({
         </div>
       </td>
       <td className="hidden md:table-cell">{item.username}</td>
-      <td className="hidden md:table-cell">{item.class.name[0]}</td>
+      <td className="hidden md:table-cell">{item.grade.level}</td>
       <td className="hidden md:table-cell">{item.phone}</td>
       <td className="hidden md:table-cell">{item.address}</td>
       <td>
@@ -114,7 +114,7 @@ const StudentListPage = async ({
   const [data, count] = await prisma.$transaction([
     prisma.student.findMany({
       where: query,
-      include: { class: true },
+      include: { class: true, grade: true },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
       orderBy: { name: sort === 'desc' ? 'desc' : 'asc' },
@@ -142,10 +142,10 @@ const StudentListPage = async ({
                   })),
                 },
                 {
-                  label: 'Grade',
+                  label: 'Year',
                   param: 'gradeId',
                   options: grades.map((g) => ({
-                    label: `Grade ${g.level}`,
+                    label: `Year ${g.level}`,
                     value: g.id.toString(),
                   })),
                 },
