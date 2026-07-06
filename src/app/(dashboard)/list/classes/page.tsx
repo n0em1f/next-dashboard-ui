@@ -6,11 +6,11 @@ import FilterSortButtons from '@/components/FilterSortButtons';
 import prisma from '@/lib/prisma';
 import { ITEM_PER_PAGE } from '@/lib/settings';
 import { auth } from '@clerk/nextjs/server';
-import { Class, Prisma, Teacher } from '@prisma/client';
+import { Class, Grade, Prisma, Teacher } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
-type ClassList = Class & { supervisor: Teacher };
+type ClassList = Class & { supervisor: Teacher; grade: Grade };
 
 const ClassListPage = async ({
   searchParams,
@@ -27,7 +27,7 @@ const ClassListPage = async ({
       accessor: 'capacity',
       className: 'hidden md:table-cell',
     },
-    { header: 'Grade', accessor: 'grade', className: 'hidden md:table-cell' },
+    { header: 'Year', accessor: 'year', className: 'hidden md:table-cell' },
     {
       header: 'Supervisor',
       accessor: 'supervisor',
@@ -43,7 +43,7 @@ const ClassListPage = async ({
     >
       <td className="flex items-center gap-4 p-4">{item.name}</td>
       <td className="hidden md:table-cell">{item.capacity}</td>
-      <td className="hidden md:table-cell">{item.name[0]}</td>
+      <td className="hidden md:table-cell">{item.grade.level}</td>
       <td className="hidden md:table-cell">
         {item.supervisor
           ? item.supervisor.name + ' ' + item.supervisor.surname
@@ -96,7 +96,7 @@ const ClassListPage = async ({
   const [data, count] = await prisma.$transaction([
     prisma.class.findMany({
       where: query,
-      include: { supervisor: true },
+      include: { supervisor: true, grade: true },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
       orderBy: { name: sort === 'desc' ? 'desc' : 'asc' },
@@ -121,10 +121,10 @@ const ClassListPage = async ({
               <FilterSortButtons
                 filterFields={[
                   {
-                    label: 'Grade',
+                    label: 'Year',
                     param: 'gradeId',
                     options: grades.map((g) => ({
-                      label: `Grade ${g.level}`,
+                      label: `Year ${g.level}`,
                       value: g.id.toString(),
                     })),
                   },
