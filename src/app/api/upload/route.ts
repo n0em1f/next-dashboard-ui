@@ -7,10 +7,21 @@ export const dynamic = 'force-dynamic';
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY, // ← schimbat
-  api_secret: process.env.CLOUDINARY_API_SECRET, // ← doar asta e nouă
+  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
+console.log(
+  'SECRET:',
+  process.env.CLOUDINARY_API_SECRET ? 'EXISTS' : 'MISSING',
+);
+console.log(
+  'KEY:',
+  process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY ? 'EXISTS' : 'MISSING',
+);
+console.log(
+  'CLOUD:',
+  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ? 'EXISTS' : 'MISSING',
+);
 export async function POST(req: NextRequest) {
   const { userId, sessionClaims } = await auth();
   if (!userId)
@@ -34,16 +45,15 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
 
-  if (file.size > 50 * 1024 * 1024)
+  if (file.size > 100 * 1024 * 1024)
     return NextResponse.json(
-      { error: 'File too large (max 50MB)' },
+      { error: 'File too large (max 100MB)' },
       { status: 400 },
     );
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   const base64 = buffer.toString('base64');
-  // folosește tipul real al fișierului (nu forța application/pdf)
   const mime = file.type || 'application/octet-stream';
   const dataUri = `data:${mime};base64,${base64}`;
 
@@ -51,10 +61,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await cloudinary.uploader.upload(dataUri, {
-      resource_type: 'raw', // 'raw' merge pentru orice tip de fișier
+      resource_type: 'raw',
       folder: isStudent ? 'academos/submissions' : 'academos/lessons',
       public_id: `${isStudent ? 'submission' : 'lesson'}_${Date.now()}`,
-      // NU mai punem `format: 'pdf'` — păstrează extensia originală
+
       use_filename: true,
     });
     return NextResponse.json({ url: result.secure_url, fileName: file.name });
