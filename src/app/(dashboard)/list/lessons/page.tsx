@@ -119,7 +119,8 @@ const LessonListPage = async ({
       where: { id: userId! },
       select: { classId: true },
     });
-    if (student) query.classId = student.classId;
+    // dacă nu găsim studentul sau clasa, nu arătăm nimic
+    query.classId = student?.classId ?? -1;
   }
 
   if (queryParams.search)
@@ -135,8 +136,11 @@ const LessonListPage = async ({
         },
       },
     ];
-  if (classId) query.classId = parseInt(classId);
-  if (teacherId) query.teacherId = teacherId;
+  // filtrele din URL doar pentru admin
+  if (role === 'admin') {
+    if (classId) query.classId = parseInt(classId);
+    if (teacherId) query.teacherId = teacherId;
+  }
 
   const [classes, teachers] = await Promise.all([
     prisma.class.findMany({

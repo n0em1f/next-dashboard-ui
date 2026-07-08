@@ -69,7 +69,7 @@ const SubjectListPage = async ({
       where: { id: userId! },
       select: { classId: true },
     });
-    if (student) query.lessons = { some: { classId: student.classId } };
+    query.lessons = { some: { classId: student?.classId ?? -1 } };
   }
 
   if (queryParams.search)

@@ -570,6 +570,9 @@ export const createAssignment = async (
     await prisma.assignment.create({
       data: {
         title: data.title,
+        description: data.description || null,
+        instructions: data.instructions || null,
+        maxScore: data.maxScore ?? null,
         startDate: data.startDate,
         dueDate: data.dueDate,
         lessonId: data.lessonId,
@@ -595,6 +598,9 @@ export const updateAssignment = async (
       where: { id: data.id },
       data: {
         title: data.title,
+        description: data.description || null,
+        instructions: data.instructions || null,
+        maxScore: data.maxScore ?? null,
         startDate: data.startDate,
         dueDate: data.dueDate,
         lessonId: data.lessonId,
@@ -1051,5 +1057,109 @@ export const deletePublication = async (
       error: true,
       message: err?.message || 'Something went wrong',
     };
+  }
+};
+
+// ---- SUBMISSIONS ----
+export const submitAssignment = async (data: {
+  assignmentId: number;
+  fileUrl: string;
+  fileName?: string;
+}) => {
+  try {
+    const { userId, sessionClaims } = await auth();
+    const role = (sessionClaims?.metadata as { role?: string })?.role;
+
+    if (!userId || role !== 'student') {
+      return { success: false, error: true, message: 'Not allowed.' };
+    }
+
+    // verifică că tema aparține clasei studentului
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: data.assignmentId },
+      include: { lesson: { select: { classId: true } } },
+    });
+    if (!assignment) {
+      return { success: false, error: true, message: 'Assignment not found.' };
+    }
+
+    const student = await prisma.student.findUnique({
+      where: { id: userId },
+      select: { classId: true },
+    });
+    if (!student || student.classId !== assignment.lesson.classId) {
+      return { success: false, error: true, message: 'Not your assignment.' };
+    }
+
+    // upsert: dacă a mai predat, actualizează fișierul (păstrează nota dacă exista)
+    await prisma.submission.upsert({
+      where: {
+        assignmentId_studentId: {
+          assignmentId: data.assignmentId,
+          studentId: userId,
+        },
+      },
+      update: {
+        fileUrl: data.fileUrl,
+        fileName: data.fileName || null,
+        submittedAt: new Date(),
+      },
+      create: {
+        assignmentId: data.assignmentId,
+        studentId: userId,
+        fileUrl: data.fileUrl,
+        fileName: data.fileName || null,
+      },
+    });
+
+    return { success: true, error: false };
+  } catch (err: any) {
+    console.log(err);
+    return { success: false, error: true, message: err?.message || 'Failed.' };
+  }
+};
+
+export const gradeSubmission = async (data: {
+  submissionId: number;
+  grade: number;
+  feedback?: string;
+}) => {
+  try {
+    const { userId, sessionClaims } = await auth();
+    const role = (sessionClaims?.metadata as { role?: string })?.role;
+
+    if (!userId || (role !== 'teacher' && role !== 'admin')) {
+      return { success: false, error: true, message: 'Not allowed.' };
+    }
+
+    // verifică că tema e a profesorului (dacă e teacher)
+    const submission = await prisma.submission.findUnique({
+      where: { id: data.submissionId },
+      include: {
+        assignment: { include: { lesson: { select: { teacherId: true } } } },
+      },
+    });
+    if (!submission) {
+      return { success: false, error: true, message: 'Submission not found.' };
+    }
+    if (
+      role === 'teacher' &&
+      submission.assignment.lesson.teacherId !== userId
+    ) {
+      return { success: false, error: true, message: 'Not your assignment.' };
+    }
+
+    await prisma.submission.update({
+      where: { id: data.submissionId },
+      data: {
+        grade: data.grade,
+        feedback: data.feedback || null,
+      },
+    });
+
+    return { success: true, error: false };
+  } catch (err: any) {
+    console.log(err);
+    return { success: false, error: true, message: err?.message || 'Failed.' };
   }
 };

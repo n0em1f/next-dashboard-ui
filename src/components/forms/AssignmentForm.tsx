@@ -12,6 +12,9 @@ import { createAssignment, updateAssignment } from '@/lib/actions';
 const schema = z.object({
   id: z.coerce.number().optional(),
   title: z.string().min(1, { message: 'Title is required!' }),
+  description: z.string().optional(), // NOU
+  instructions: z.string().optional(), // NOU
+  maxScore: z.coerce.number().optional(), // NOU
   startDate: z.coerce.date({ message: 'Start date is required!' }),
   dueDate: z.coerce.date({ message: 'Due date is required!' }),
   lessonId: z.coerce.number({ message: 'Lesson is required!' }),
@@ -75,6 +78,30 @@ const AssignmentForm = ({
           defaultValue={data?.title}
           register={register}
           error={errors?.title}
+        />
+        <div className="flex flex-col gap-2 w-full">
+          <label className="text-xs text-gray-500">Description</label>
+          <textarea
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full min-h-[80px]"
+            {...register('description')}
+            defaultValue={data?.description}
+          />
+        </div>
+        <div className="flex flex-col gap-2 w-full">
+          <label className="text-xs text-gray-500">Instructions</label>
+          <textarea
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full min-h-[80px]"
+            {...register('instructions')}
+            defaultValue={data?.instructions}
+          />
+        </div>
+        <InputField
+          label="Max Score"
+          name="maxScore"
+          type="number"
+          defaultValue={data?.maxScore}
+          register={register}
+          error={errors?.maxScore}
         />
         <InputField
           label="Start Date"

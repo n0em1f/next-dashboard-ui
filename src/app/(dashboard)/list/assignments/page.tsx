@@ -7,6 +7,7 @@ import prisma from '@/lib/prisma';
 import { ITEM_PER_PAGE } from '@/lib/settings';
 import { auth } from '@clerk/nextjs/server';
 import { Assignment, Class, Prisma, Subject, Teacher } from '@prisma/client';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,12 @@ const AssignmentListPage = async ({
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">
-        {item.lesson.subject.name}
+        <Link
+          href={`/list/assignments/${item.id}`}
+          className="font-medium text-blue-600 hover:underline"
+        >
+          {item.lesson.subject.name}
+        </Link>
       </td>
       <td>{item.lesson.class.name}</td>
       <td className="hidden md:table-cell">
