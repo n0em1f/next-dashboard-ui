@@ -9,8 +9,8 @@ export async function POST(req: NextRequest) {
   // Config INSIDE the handler — on serverless (Vercel) a module-level
   // config() can be lost between invocations, causing "Must supply api_secret".
   cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
 
