@@ -5,24 +5,15 @@ import { v2 as cloudinary } from 'cloudinary';
 
 export const dynamic = 'force-dynamic';
 
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-console.log(
-  'SECRET:',
-  process.env.CLOUDINARY_API_SECRET ? 'EXISTS' : 'MISSING',
-);
-console.log(
-  'KEY:',
-  process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY ? 'EXISTS' : 'MISSING',
-);
-console.log(
-  'CLOUD:',
-  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ? 'EXISTS' : 'MISSING',
-);
 export async function POST(req: NextRequest) {
+  // Config INSIDE the handler — on serverless (Vercel) a module-level
+  // config() can be lost between invocations, causing "Must supply api_secret".
+  cloudinary.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
   const { userId, sessionClaims } = await auth();
   if (!userId)
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -64,9 +55,13 @@ export async function POST(req: NextRequest) {
       resource_type: 'raw',
       folder: isStudent ? 'academos/submissions' : 'academos/lessons',
       public_id: `${isStudent ? 'submission' : 'lesson'}_${Date.now()}`,
-
       use_filename: true,
-    });
+      // Pass credentials explicitly as a belt-and-braces fallback:
+      // if config() somehow didn't stick, these still authenticate the call.
+      api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    } as any);
     return NextResponse.json({ url: result.secure_url, fileName: file.name });
   } catch (err: any) {
     console.error('Cloudinary error:', err);
