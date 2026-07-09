@@ -25,6 +25,13 @@ const schema = z.object({
 
 type Inputs = z.infer<typeof schema>;
 
+type TeacherOption = {
+  id: string;
+  name: string;
+  surname: string;
+  subjects?: { id: number }[];
+};
+
 const toDatetimeLocal = (iso?: string) => {
   if (!iso) return '';
   try {
@@ -47,6 +54,9 @@ const LessonForm = ({
 }) => {
   const router = useRouter();
 
+  // Destructure FIRST, so `teachers` exists before we filter it.
+  const { subjects, classes, teachers } = relatedData ?? {};
+
   const {
     register,
     handleSubmit,
@@ -65,6 +75,15 @@ const LessonForm = ({
       endTime: toDatetimeLocal(data?.endTime),
     },
   });
+
+  // Watch the selected subject so the teacher list re-filters on change.
+  const selectedSubjectId = watch('subjectId');
+
+  const filteredTeachers: TeacherOption[] = (teachers ?? []).filter(
+    (t: TeacherOption) =>
+      !selectedSubjectId ||
+      t.subjects?.some((s) => s.id === Number(selectedSubjectId)),
+  );
 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -168,8 +187,6 @@ const LessonForm = ({
       setSubmitting(false);
     }
   });
-
-  const { subjects, classes, teachers } = relatedData ?? {};
 
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
@@ -283,12 +300,14 @@ const LessonForm = ({
               {...register('teacherId')}
               defaultValue={data?.teacherId}
             >
-              {teachers.map(
-                (teacher: { id: string; name: string; surname: string }) => (
+              {filteredTeachers.length === 0 ? (
+                <option value="">No teacher for this subject</option>
+              ) : (
+                filteredTeachers.map((teacher: TeacherOption) => (
                   <option value={teacher.id} key={teacher.id}>
                     {teacher.name + ' ' + teacher.surname}
                   </option>
-                ),
+                ))
               )}
             </select>
             {errors.teacherId?.message && (
